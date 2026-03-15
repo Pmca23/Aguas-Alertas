@@ -36,7 +36,7 @@ A plataforma Águas Alerta está organizada em duas áreas principais: o dashboa
 ```
 Águas Alerta
 │
-├── 🌐 Dashboard Público  →  index.html
+├── Dashboard Público  →  index.html
 │   ├── Mapa SIG com estações georreferenciadas (Leaflet.js)
 │   │   └── Clique numa estação
 │   │       ├── Nível atual da água (metros)
@@ -47,7 +47,7 @@ A plataforma Águas Alerta está organizada em duas áreas principais: o dashboa
 │   ├── Banner de alerta ativo (aparece automaticamente)
 │   └── Tabela das últimas 30 leituras dos sensores
 │
-└── 🔒 Backoffice  →  backoffice/index.php
+└── Backoffice  →  backoffice/index.php
     ├── Dashboard estatístico dinâmico
     ├── Gestão de estações (adicionar / editar / desativar)
     ├── Histórico de alertas
