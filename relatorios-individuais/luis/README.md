@@ -26,9 +26,7 @@ Criar os primeiros mockups da interface, incluindo:
 Visualização gráfica do nível da água
 Alertas automáticos
 Histórico de medições
-
 2º Relatório
-
 1. Validação da Base de Dados
 1.1 Mapa de Navegação
 A plataforma Águas Alerta encontra-se organizada em duas áreas distintas:
@@ -78,7 +76,7 @@ O frontend foi devidamente estruturado, servindo como base visual para a impleme
 Foi desenvolvido com HTML5, CSS3 e JavaScript, utilizando apenas a biblioteca Leaflet.js para a componente de mapa.
 Mais do que uma interface final, esta página funciona também como um modelo visual (wireframe funcional) que orienta o desenvolvimento e valida a forma como os dados são apresentados ao utilizador.
 A página principal organiza a informação de forma clara e intuitiva, permitindo acompanhar o estado das estações em tempo real.
-Elementos apresentados:
+Elementos apresentados
 Cards de resumo
 Apresentam indicadores gerais, como o nível máximo registado, o caudal e o número de alertas ativos, com destaque visual em situações críticas.
 Mapa SIG interativo
