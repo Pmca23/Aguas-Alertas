@@ -92,3 +92,49 @@ Tabela de leituras
 Considerações Finais
 O frontend permite validar a organização da informação e a experiência do utilizador, funcionando como uma representação clara do sistema final.
 Facilita também a evolução do projeto antes da integração completa.
+# 3º Relatório
+
+## 1. Evolução do Projeto
+
+### 1.1 Aquisição de Sensores
+
+Durante esta fase do projeto, foi realizada a aquisição dos sensores necessários para o sistema de monitoramento dos rios.
+
+Os sensores adquiridos permitem medir:
+- Nível da água
+- Caudal
+- Possíveis variações críticas
+
+Esta etapa foi essencial para avançar da componente teórica para a implementação prática do sistema.
+
+---
+
+### 1.2 Contacto com o TechLab
+
+Foi estabelecido contacto com o TechLab com o objetivo de:
+- Obter orientação técnica sobre os sensores
+- Validar a escolha dos componentes
+- Esclarecer dúvidas relacionadas com instalação e funcionamento
+
+O feedback recebido ajudou a garantir que os sensores escolhidos são adequados para o contexto do projeto.
+
+---
+
+### 1.3 Início da Montagem
+
+Após a aquisição dos sensores, iniciou-se a fase de montagem.
+
+Nesta fase:
+- Foram preparados os primeiros componentes
+- Iniciou-se a integração dos sensores com o sistema
+- Foram realizados testes iniciais de funcionamento
+
+A montagem encontra-se ainda em progresso, sendo esta uma etapa fundamental para a futura recolha de dados reais.
+
+---
+
+## 2. Estado Atual do Projeto
+
+Atualmente, o projeto encontra-se numa fase de transição entre:
+- Planeamento
+- Implementação prática
