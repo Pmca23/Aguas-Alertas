@@ -103,7 +103,8 @@ Durante esta fase do projeto, foi realizada a aquisição dos sensores necessár
 Os sensores adquiridos permitem medir:
 - Nível da água
 - Caudal
-- Possíveis variações críticas
+- Temperatura
+- Percepitação 
 
 Esta etapa foi essencial para avançar da componente teórica para a implementação prática do sistema.
 
