@@ -74,7 +74,7 @@ A plataforma **Águas Alerta** encontra-se organizada em duas áreas distintas:
 │   └── Tabela de leituras
 │
 └── Backoffice  →  backoffice/index.php
-
+```
 2.3 Frontend — Interface do Utilizador
 O frontend foi estruturado como base visual da aplicação.
 Desenvolvido com:
