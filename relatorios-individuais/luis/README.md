@@ -139,3 +139,74 @@ A montagem encontra-se ainda em progresso, sendo esta uma etapa fundamental para
 Atualmente, o projeto encontra-se numa fase de transição entre:
 - Planeamento
 - Implementação prática
+
+# 4º Relatório
+
+## 1. Desenvolvimento dos Sensores
+
+### 1.1 Sensor de Distância
+
+Durante esta fase, foi possível colocar o sensor de distância totalmente funcional.
+
+O sensor:
+- Realiza leituras corretamente
+- Está integrado com o sistema
+- Comunica com a base de dados
+
+Isto permite já obter dados reais sobre o nível da água, representando um avanço importante no projeto.
+
+---
+
+### 1.2 Sensor de Temperatura
+
+O sensor de temperatura foi também implementado com sucesso.
+
+Atualmente:
+- Está funcional e a realizar leituras
+- Ainda não se encontra ligado à base de dados
+
+Apesar disso, encontra-se pronto para integração futura no sistema.
+
+---
+
+### 1.3 Sensor de Chuva
+
+O sensor de chuva encontra-se igualmente operacional.
+
+Neste momento:
+- Deteta corretamente a presença de chuva
+- Ainda não comunica com a base de dados
+
+Tal como o sensor de temperatura, necessita apenas da fase de integração.
+
+---
+
+## 2. Estrutura do Website
+
+### 2.1 Organização do Sistema
+
+Foi dada continuidade à estruturação do website da aplicação.
+
+Foram definidos:
+- Componentes principais da interface
+- Organização das páginas
+- Estrutura base do frontend
+
+Esta organização facilita a futura integração com os dados dos sensores.
+
+---
+
+### 2.2 Mockups no Figma
+
+Desenvolvi as mockups no Figma com o objetivo de:
+- Definir o aspeto visual da aplicação
+- Planear a experiência do utilizador
+- Servir de base para o desenvolvimento frontend
+
+Os mockups incluem:
+- Dashboard principal
+- Visualização de dados
+- Elementos de alerta
+- Login Admin
+- Página Admin 
+
