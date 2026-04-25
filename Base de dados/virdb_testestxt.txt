@@ -1,0 +1,168 @@
+-- ============================================================
+-- ÁGUAS ALERTA · V.I.R. (SEM CAUDAL)
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS vir_db
+DEFAULT CHARACTER SET utf8mb4
+DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE vir_db;
+
+-- ============================================================
+-- ESTACOES
+-- ============================================================
+CREATE TABLE estacoes (
+    id_estacao INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    localizacao VARCHAR(100) NOT NULL,
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
+    nivel_max_seguranca FLOAT NOT NULL,
+    data_instalacao DATE
+);
+
+-- ============================================================
+-- LEITURAS
+-- ============================================================
+CREATE TABLE leituras (
+    id_leitura INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    nivel_agua FLOAT NOT NULL,
+    temperatura FLOAT,
+    em_alerta BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- ALERTAS
+-- ============================================================
+CREATE TABLE alertas (
+    id_alerta INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    nivel_critico FLOAT,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('ativo','resolvido') DEFAULT 'ativo',
+    resolvido_em DATETIME,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- LOCALIDADES
+-- ============================================================
+CREATE TABLE localidades (
+    id_localidade INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    contacto_email VARCHAR(150),
+    contacto_tel VARCHAR(20),
+    nivel_prioridade INT DEFAULT 1,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- NOTIFICACOES
+-- ============================================================
+CREATE TABLE notificacoes (
+    id_notif INT AUTO_INCREMENT PRIMARY KEY,
+    id_alerta INT NOT NULL,
+    id_localidade INT NOT NULL,
+    canal ENUM('email','sms','sirene') NOT NULL,
+    enviada_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    sucesso BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_alerta) REFERENCES alertas(id_alerta)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_localidade) REFERENCES localidades(id_localidade)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- UTILIZADORES
+-- ============================================================
+CREATE TABLE utilizadores (
+    id_utilizador INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin','tecnico') DEFAULT 'tecnico',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- STORED PROCEDURE (SEM CAUDAL)
+-- ============================================================
+DELIMITER $$
+
+CREATE PROCEDURE sp_registar_leitura(
+    IN p_id_estacao INT,
+    IN p_nivel FLOAT,
+    IN p_temp FLOAT
+)
+BEGIN
+    DECLARE v_nivel_max FLOAT;
+    DECLARE v_alerta BOOLEAN DEFAULT FALSE;
+    DECLARE v_existe INT DEFAULT 0;
+
+    SELECT nivel_max_seguranca
+    INTO v_nivel_max
+    FROM estacoes WHERE id_estacao = p_id_estacao;
+
+    IF p_nivel > v_nivel_max THEN
+        SET v_alerta = TRUE;
+    END IF;
+
+    INSERT INTO leituras (id_estacao, nivel_agua, temperatura, em_alerta)
+    VALUES (p_id_estacao, p_nivel, p_temp, v_alerta);
+
+    IF v_alerta THEN
+        SELECT COUNT(*) INTO v_existe
+        FROM alertas
+        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+
+        IF v_existe = 0 THEN
+            INSERT INTO alertas (id_estacao, nivel_critico)
+            VALUES (p_id_estacao, p_nivel);
+        END IF;
+    ELSE
+        UPDATE alertas
+        SET estado = 'resolvido', resolvido_em = NOW()
+        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================================
+-- VIEWS
+-- ============================================================
+
+CREATE VIEW v_ultima_leitura AS
+SELECT
+    e.id_estacao,
+    e.nome,
+    e.localizacao,
+    e.latitude,
+    e.longitude,
+    l.timestamp,
+    l.nivel_agua,
+    l.temperatura,
+    l.em_alerta
+FROM estacoes e
+JOIN leituras l ON l.id_leitura = (
+    SELECT id_leitura FROM leituras
+    WHERE id_estacao = e.id_estacao
+    ORDER BY timestamp DESC
+    LIMIT 1
+);
+
+CREATE VIEW v_alertas_ativos AS
+SELECT
+    a.*,
+    e.nome,
+    e.localizacao
+FROM alertas a
+JOIN estacoes e ON e.id_estacao = a.id_estacao
+WHERE a.estado = 'ativo';

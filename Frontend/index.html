@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Águas Alerta</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <header>
+    <img src="assets/images/logo.png" alt="Águas Alerta" class="logo">
+    <a href="#" class="admin-btn">↪ Admin</a>
+  </header>
+
+  <main class="hero">
+    <section class="hero-text">
+      <h1>Águas alertas</h1>
+      <p>em todo o sítio perto de si</p>
+    </section>
+
+    <section class="search-box">
+      <input id="searchInput" type="text" placeholder="Pesquise pela sua zona">
+
+      <button class="icon-btn">
+        <i data-lucide="map-pin"></i>
+      </button>
+
+      <button class="icon-btn" onclick="goToDashboard()">
+        <i data-lucide="search"></i>
+      </button>
+    </section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    function goToDashboard() {
+      const zona = document.getElementById("searchInput").value;
+
+      if (zona.trim() !== "") {
+        window.location.href = "pages/dashboard.html";
+      }
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  color: white;
+
+  background:
+    radial-gradient(circle at 20% 15%, rgba(48, 80, 160, 0.45), transparent 30%),
+    radial-gradient(circle at 80% 70%, rgba(33, 95, 255, 0.35), transparent 35%),
+    linear-gradient(135deg, #14255f 0%, #1d3d91 45%, #123fd0 100%);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+header {
+  width: 100%;
+  padding: 30px 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  width: 85px;
+}
+
+.admin-btn {
+  color: white;
+  text-decoration: none;
+  padding: 11px 22px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.admin-btn:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.hero {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 260px;
+  text-align: center;
+}
+
+.hero-text h1 {
+  font-size: 56px;
+  font-weight: 700;
+}
+
+.hero-text p {
+  margin-top: 15px;
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+}
+
+.search-box {
+  width: 560px;
+  max-width: 85%;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(7, 35, 130, 0.35);
+  box-shadow: 0 0 25px rgba(0,0,0,0.15);
+}
+
+.search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 16px;
+  font-family: 'Roboto', sans-serif;
+}
+
+.search-box input::placeholder {
+  color: rgba(255,255,255,0.35);
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #2563ff;
+  color: white;
+  font-size: 18px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.icon-btn:hover {
+  background: #3b82f6;
+
+  .icon-btn i {
+  width: 20px;
+  height: 20px;
+}
+}
