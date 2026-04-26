@@ -42,6 +42,7 @@ CREATE TABLE alertas (
     id_alerta INT AUTO_INCREMENT PRIMARY KEY,
     id_estacao INT NOT NULL,
     nivel_critico FLOAT,
+    tipo ENUM('informacao','aviso','critico') DEFAULT 'aviso',
     data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('ativo','resolvido') DEFAULT 'ativo',
     resolvido_em DATETIME,
@@ -109,7 +110,7 @@ CREATE TABLE observacoes (
 );
 
 -- ============================================================
--- STORED PROCEDURE
+-- STORED PROCEDURE (SEM CAUDAL)
 -- ============================================================
 DELIMITER $$
 
