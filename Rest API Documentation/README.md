@@ -284,3 +284,9 @@ GET /api/public/alertas_ativos.php
 Histórico Público
 
 GET /api/public/historico.php
+
+Url base da api é http://localhost/Aguas-Alertas/Backend/backend/api/
+Email: admin@aguasalerta.pt
+Password: admin123
+
+http://localhost/Aguas-Alertas/Frontend/index.html

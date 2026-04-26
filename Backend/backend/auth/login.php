@@ -1,5 +1,13 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 require_once "../config/db.php";
 require_once "../vendor/autoload.php";
@@ -12,7 +20,6 @@ $email = $_POST["email"] ?? null;
 $password = $_POST["password"] ?? null;
 
 if(!$email || !$password){
-
     echo json_encode([
         "status"=>"erro",
         "mensagem"=>"Dados em falta"
@@ -32,7 +39,6 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
 if(!$user){
-
     echo json_encode([
         "status"=>"erro",
         "mensagem"=>"Utilizador não encontrado"
@@ -41,7 +47,6 @@ if(!$user){
 }
 
 if(!password_verify($password,$user["password_hash"])){
-
     echo json_encode([
         "status"=>"erro",
         "mensagem"=>"Password incorreta"

@@ -55,12 +55,14 @@
     .back-link:hover { color: white; }
 
     .card-header { text-align: center; margin-bottom: 36px; }
-    .shield-icon {
-      width: 56px; height: 56px; border-radius: 16px;
-      background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.35);
+    .logo-wrap {
+      width: 90px; height: 90px;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px; color: #60a5fa;
+      margin: 0 auto 20px;
+      background: none; border: none;
     }
+    .logo-wrap img { width: 90px; height: 90px; object-fit: contain; }
+
     .card-header h1 { font-family:'Montserrat',sans-serif; font-size:22px; font-weight:700; color:white; margin-bottom:6px; }
     .card-header p  { color:rgba(255,255,255,0.5); font-size:14px; }
 
@@ -137,9 +139,9 @@
 
     <div class="login-card">
       <div class="card-header">
-       <div class="shield-icon" style="background:none; border:none; width:90px; height:90px;">
-  <img src="../assets/images/logo.png" alt="Águas Alerta" style="width:90px;height:90px;object-fit:contain;">
-</div>
+        <div class="logo-wrap">
+          <img src="../assets/images/logosemtexto.png" alt="Águas Alerta">
+        </div>
         <h1>Área de Administração</h1>
         <p>Acesso restrito a administradores</p>
       </div>
@@ -150,10 +152,10 @@
       </div>
 
       <div class="field">
-        <label>Utilizador</label>
+        <label>Email</label>
         <div class="input-wrap">
-          <span class="icon"><i data-lucide="user" style="width:17px;height:17px;"></i></span>
-          <input type="text" id="username" placeholder="nome de utilizador" autocomplete="username">
+          <span class="icon"><i data-lucide="mail" style="width:17px;height:17px;"></i></span>
+          <input type="email" id="email" placeholder="email@exemplo.pt" autocomplete="email">
         </div>
       </div>
 
@@ -188,6 +190,9 @@
   <script>
     lucide.createIcons();
 
+    // URL base da API
+    const API_BASE = 'http://localhost/Aguas-Alertas/Backend/backend';
+
     let pwVisible = false;
     document.getElementById('togglePw').addEventListener('click', () => {
       pwVisible = !pwVisible;
@@ -196,11 +201,11 @@
       lucide.createIcons();
     });
 
-    document.getElementById('username').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
+    document.getElementById('email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
     document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
 
-    function handleLogin() {
-      const username = document.getElementById('username').value.trim();
+    async function handleLogin() {
+      const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const btn      = document.getElementById('loginBtn');
       const spinner  = document.getElementById('spinner');
@@ -211,39 +216,64 @@
 
       errorMsg.classList.remove('visible');
 
-      if (!username || !password) {
+      if (!email || !password) {
         errorText.textContent = 'Preencha todos os campos.';
         errorMsg.classList.add('visible');
         return;
       }
 
+      // Loading
       btn.disabled = true;
       spinner.style.display = 'block';
       btnText.textContent = 'A verificar...';
       btnArrow.style.display = 'none';
 
-      setTimeout(() => {
-        // Credenciais demo — substitui pela tua autenticação real
-        if (username === 'admin' && password === 'admin123') {
+      try {
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const response = await fetch(`${API_BASE}/auth/login.php`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+          // Guardar token e info do utilizador
           sessionStorage.setItem('adminAuth', 'true');
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('userNome', data.user.nome);
+          sessionStorage.setItem('userRole', data.user.role);
+
+          // Mostrar sucesso
           spinner.style.display = 'none';
           document.getElementById('successOverlay').classList.add('visible');
           lucide.createIcons();
-          setTimeout(() => { window.location.href = 'admin.html'; }, 1200);
+
+          setTimeout(() => { const destino = data.user.role === 'admin' ? 'admin.html' : 'tecnico.html'; window.location.href = destino; }, 1200);
+
         } else {
-          btn.disabled = false;
-          spinner.style.display = 'none';
-          btnText.textContent = 'Entrar';
-          btnArrow.style.display = '';
-          errorText.textContent = 'Credenciais inválidas. Tente novamente.';
-          errorMsg.classList.add('visible');
-          const card = document.querySelector('.login-card');
-          card.style.transition = 'transform 0.08s ease';
-          ['-8px','8px','-5px','5px','0'].forEach((v,i) => {
-            setTimeout(() => { card.style.transform = `translateX(${v})`; }, i * 80);
-          });
+          // Erro da API
+          throw new Error(data.mensagem || 'Credenciais inválidas.');
         }
-      }, 1000);
+
+      } catch (err) {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Entrar';
+        btnArrow.style.display = '';
+        errorText.textContent = err.message || 'Erro ao ligar ao servidor.';
+        errorMsg.classList.add('visible');
+
+        // Animação shake
+        const card = document.querySelector('.login-card');
+        card.style.transition = 'transform 0.08s ease';
+        ['-8px','8px','-5px','5px','0'].forEach((v,i) => {
+          setTimeout(() => { card.style.transform = `translateX(${v})`; }, i * 80);
+        });
+      }
     }
   </script>
 

@@ -1,448 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
   <meta charset="UTF-8">
-  <title>Painel de Administração — Águas Alerta</title>
+  <title>Painel Admin — Águas Alerta</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-      background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%);
-      color: white;
-      padding: 36px 40px;
-    }
-
-    .page { max-width: 1000px; margin: 0 auto; }
-
-    .back {
-      color: rgba(255,255,255,0.6); text-decoration: none;
-      font-size: 14px; font-weight: 700;
-      display: inline-flex; align-items: center; gap: 6px;
-      margin-bottom: 22px; transition: color 0.2s;
-    }
+    body { font-family: 'Roboto', sans-serif; min-height: 100vh; background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%); color: white; padding: 36px 40px; }
+    .page { max-width: 1100px; margin: 0 auto; }
+    .back { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; transition: color 0.2s; }
     .back:hover { color: white; }
-
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; }
     .page-title h1 { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 700; }
-    .page-title p  { margin-top: 6px; color: rgba(255,255,255,0.5); font-size: 16px; }
-
+    .page-title p { margin-top: 6px; color: rgba(255,255,255,0.5); font-size: 16px; }
+    .user-badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .user-badge span { color: rgba(255,255,255,0.6); }
+    .role-pill { background: rgba(168,85,247,0.25); border: 1px solid rgba(168,85,247,0.4); color: #c4b5fd; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
     .line { height: 1px; background: rgba(255,255,255,0.1); margin: 22px 0; }
-
-    /* Tabs */
-    .tabs {
-      display: flex; gap: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 32px;
-    }
-    .tab {
-      background: none; border: none;
-      color: rgba(255,255,255,0.5);
-      font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700;
-      padding: 14px 26px; cursor: pointer;
-      border-bottom: 3px solid transparent; transition: color 0.2s;
-    }
+    .tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 28px; }
+    .tab { background: none; border: none; color: rgba(255,255,255,0.5); font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.2s; display: flex; align-items: center; gap: 8px; }
     .tab.active { color: white; border-bottom-color: #3b82f6; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-
-    /* Section blocks */
-    .section-block {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 14px;
-      padding: 28px;
-      margin-bottom: 24px;
-    }
-    .section-block h2 { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-
-    /* Select */
-    .field-label {
-      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55);
-      text-transform: uppercase; letter-spacing: 0.05em;
-      margin-bottom: 8px; display: block;
-    }
-
-    select, input[type="number"], input[type="text"] {
-      width: 100%;
-      padding: 12px 14px;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 9px;
-      color: white;
-      font-family: 'Roboto', sans-serif;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 38px; }
-    select option { background: #0f1f6e; }
-    input:focus, select:focus { border-color: rgba(59,130,246,0.7); background: rgba(59,130,246,0.07); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
+    .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 22px; }
+    .stat-card .lbl { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-card .val { font-size: 36px; font-weight: 500; margin-bottom: 4px; }
+    .stat-card .sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+    .stat-card.danger .val { color: #f87171; }
+    .stat-card.success .val { color: #4ade80; }
+    .stat-card.info .val { color: #60a5fa; }
+    .chart-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; }
+    .chart-box h3 { margin-bottom: 20px; font-size: 16px; }
+    .section-block { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
+    .section-block h2 { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .count-badge { background: rgba(255,255,255,0.08); border-radius: 99px; font-size: 12px; font-weight: 700; padding: 2px 10px; color: rgba(255,255,255,0.5); }
+    .field-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; color: white; font-family: 'Roboto', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s, background 0.2s; }
+    input:focus { border-color: rgba(59,130,246,0.7); background: rgba(59,130,246,0.07); }
     input::placeholder { color: rgba(255,255,255,0.28); }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-
-    /* Buttons */
-    .btn {
-      padding: 12px 22px; border-radius: 9px; border: none;
-      font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      transition: background 0.2s, transform 0.12s;
-    }
+    .btn { padding: 11px 20px; border-radius: 9px; border: none; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, transform 0.12s; }
     .btn:active { transform: scale(0.97); }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
-    .btn-success { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-    .btn-success:hover { background: rgba(34,197,94,0.3); }
-
-    /* Preview cards */
-    .preview-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 4px; }
-    .preview-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 12px; padding: 18px 20px;
-    }
-    .preview-card .lbl { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700; margin-bottom: 8px; }
-    .preview-card .val { font-size: 28px; font-weight: 500; }
-    .preview-card .val span { font-size: 14px; color: rgba(255,255,255,0.5); margin-left: 3px; }
-
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
-      background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35);
-      border-radius: 10px; padding: 12px 22px;
-      color: #4ade80; font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; gap: 10px;
-      opacity: 0; transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none; white-space: nowrap;
-    }
+    .user-list { display: flex; flex-direction: column; gap: 12px; }
+    .user-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .user-item-left { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: rgba(59,130,246,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #93c5fd; flex-shrink: 0; }
+    .avatar.admin { background: rgba(168,85,247,0.2); color: #c4b5fd; }
+    .user-nome { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .user-email { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .role-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+    .role-tag.admin { background: rgba(168,85,247,0.2); color: #c4b5fd; border: 1px solid rgba(168,85,247,0.3); }
+    .role-tag.tecnico { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+    .btn-icon { background: none; border: none; cursor: pointer; color: rgba(239,68,68,0.5); padding: 8px; border-radius: 7px; transition: color 0.2s, background 0.2s; display: flex; }
+    .btn-icon:hover { color: #f87171; background: rgba(239,68,68,0.1); }
+    .loading { color: rgba(255,255,255,0.4); font-size: 14px; padding: 20px 0; }
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); border-radius: 10px; padding: 12px 22px; color: #4ade80; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* Alert items in gestão */
-    .alerts-section h2 { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-
-    .alert-item {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 10px; padding: 16px 20px;
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    .alert-item.warning { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.08); }
-    .alert-item.danger  { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.08); }
-
-    .alert-item-info h4 { font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
-    .alert-item-info p  { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
-    .alert-item-info .nivel { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 700; }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 9px; border-radius: 5px;
-      font-size: 11px; font-weight: 700;
-    }
-    .badge-warning { background: #f97316; color: white; }
-    .badge-danger  { background: #ef4444; color: white; }
-    .badge-info    { background: #3b82f6; color: white; }
-
-    .btn-delete {
-      background: none; border: none; cursor: pointer;
-      color: rgba(239,68,68,0.6); padding: 6px;
-      border-radius: 6px; transition: color 0.2s, background 0.2s;
-      display: flex; align-items: center;
-    }
-    .btn-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-
-    .alerts-count { color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 700; margin-left: 8px; }
-
-    @media (max-width: 700px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .preview-grid { grid-template-columns: 1fr; }
-    }
+    .toast.error { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .grid-3 { grid-template-columns: 1fr; } }
   </style>
 </head>
-
 <body>
-
 <main class="page">
-
-  <a href="login.html" class="back" onclick="handleSair(event)">
+  <a href="#" class="back" onclick="handleSair(event)">
     <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
     Sair
   </a>
-
-  <div class="page-title">
-    <h1>Painel de Administração</h1>
-    <p>Gestão de rios e alertas do sistema</p>
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Painel de Administração</h1>
+      <p>Gestão de utilizadores e estatísticas do sistema</p>
+    </div>
+    <div class="user-badge">
+      <i data-lucide="user-circle" style="width:18px;height:18px;color:rgba(255,255,255,0.5);"></i>
+      <span id="userNome">—</span>
+      <span class="role-pill">ADMIN</span>
+    </div>
   </div>
-
   <div class="line"></div>
-
   <div class="tabs">
-    <button class="tab active" onclick="openTab('rios', this)">Gestão de Rios</button>
-    <button class="tab" onclick="openTab('alertas', this)">Gestão de Alertas</button>
+    <button class="tab active" onclick="openTab('estatisticas', this)">
+      <i data-lucide="bar-chart-2" style="width:15px;height:15px;"></i>
+      Estatísticas
+    </button>
+    <button class="tab" onclick="openTab('utilizadores', this)">
+      <i data-lucide="users" style="width:15px;height:15px;"></i>
+      Utilizadores
+    </button>
+    <button class="tab" onclick="openTab('criar', this)">
+      <i data-lucide="user-plus" style="width:15px;height:15px;"></i>
+      Criar Técnico
+    </button>
   </div>
 
-  <!-- GESTÃO DE RIOS -->
-  <section id="rios" class="tab-content active">
-
-    <div class="section-block">
-      <h2>Selecionar Rio</h2>
-      <label class="field-label">Rio</label>
-      <select id="rioSelect" onchange="loadRio()">
-        <option value="douro">Rio Douro</option>
-        <option value="tejo">Rio Tejo</option>
-        <option value="mondego">Rio Mondego</option>
-        <option value="minho">Rio Minho</option>
-        <option value="guadiana">Rio Guadiana</option>
-      </select>
+  <!-- ESTATÍSTICAS -->
+  <section id="estatisticas" class="tab-content active">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="lbl">Total Estações</div><div class="val" id="sEstacoes">—</div><div class="sub">Estações monitorizadas</div></div>
+      <div class="stat-card danger"><div class="lbl">Alertas Ativos</div><div class="val" id="sAlertas">—</div><div class="sub">Em situação crítica</div></div>
+      <div class="stat-card info"><div class="lbl">Nível Médio</div><div class="val" id="sNivel">—</div><div class="sub">Média global (m)</div></div>
+      <div class="stat-card success"><div class="lbl">Utilizadores</div><div class="val" id="sUsers">—</div><div class="sub">Admins e técnicos</div></div>
     </div>
-
-    <div class="section-block">
-      <h2 id="editTitle">Editar Dados do Rio Douro</h2>
-
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Nível do Rio (m)</label>
-          <input type="number" id="fNivel" value="4.2" step="0.1" min="0" oninput="updatePreview()">
-        </div>
-        <div>
-          <label class="field-label">Limite de Segurança (m)</label>
-          <input type="number" id="fLimite" value="5" step="0.1" min="0" oninput="updatePreview()">
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Precipitação (mm)</label>
-          <input type="number" id="fPrec" value="12" step="0.1" min="0" oninput="updatePreview()">
-        </div>
-        <div>
-          <label class="field-label">Temperatura (°C)</label>
-          <input type="number" id="fTemp" value="22" step="0.1" oninput="updatePreview()">
-        </div>
-      </div>
-
-      <button class="btn btn-success" onclick="guardarAlteracoes()">
-        <i data-lucide="save" style="width:16px;height:16px;"></i>
-        Guardar Alterações
-      </button>
+    <div class="chart-box">
+      <h3>Nível Atual por Estação</h3>
+      <canvas id="statsChart" height="100"></canvas>
     </div>
-
-    <div class="section-block">
-      <h2>Pré-visualização</h2>
-      <div class="preview-grid">
-        <div class="preview-card">
-          <div class="lbl">Nível Atual</div>
-          <div class="val" id="pvNivel">4.20 <span>m</span></div>
-        </div>
-        <div class="preview-card">
-          <div class="lbl">Precipitação</div>
-          <div class="val" id="pvPrec">12.0 <span>mm</span></div>
-        </div>
-        <div class="preview-card">
-          <div class="lbl">Temperatura</div>
-          <div class="val" id="pvTemp">22.0 <span>°C</span></div>
-        </div>
-      </div>
-    </div>
-
   </section>
 
-  <!-- GESTÃO DE ALERTAS -->
-  <section id="alertas" class="tab-content">
-
+  <!-- UTILIZADORES -->
+  <section id="utilizadores" class="tab-content">
     <div class="section-block">
-      <h2>Adicionar Novo Alerta</h2>
-
-      <div class="grid-2" style="margin-bottom:18px;">
-        <div>
-          <label class="field-label">Região</label>
-          <input type="text" id="aRegiao" placeholder="Ex: Rio Douro — Porto">
-        </div>
-        <div>
-          <label class="field-label">Nível (m)</label>
-          <input type="number" id="aNivel" value="0" step="0.1" min="0">
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Descrição</label>
-          <input type="text" id="aDesc" placeholder="Ex: Nível da água subiu rapidamente">
-        </div>
-        <div>
-          <label class="field-label">Tipo de Alerta</label>
-          <select id="aTipo">
-            <option value="info">Informação</option>
-            <option value="warning">Aviso</option>
-            <option value="danger">Crítico</option>
-          </select>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" style="margin-top:18px;" onclick="adicionarAlerta()">
-        <i data-lucide="plus" style="width:16px;height:16px;"></i>
-        Adicionar Alerta
-      </button>
+      <h2>Utilizadores do Sistema <span class="count-badge" id="userCount">0</span></h2>
+      <div class="user-list" id="userList"><p class="loading">A carregar utilizadores...</p></div>
     </div>
-
-    <div class="alerts-section">
-      <h2>
-        Alertas Ativos
-        <span class="alerts-count" id="alertCount">(2)</span>
-      </h2>
-      <div id="alertList"></div>
-    </div>
-
   </section>
 
+  <!-- CRIAR TÉCNICO -->
+  <section id="criar" class="tab-content">
+    <div class="section-block">
+      <h2>Criar Novo Técnico</h2>
+      <div class="grid-3">
+        <div><label class="field-label">Nome</label><input type="text" id="cNome" placeholder="Nome completo"></div>
+        <div><label class="field-label">Email</label><input type="email" id="cEmail" placeholder="email@exemplo.pt"></div>
+        <div><label class="field-label">Palavra-passe</label><input type="password" id="cPassword" placeholder="••••••••"></div>
+      </div>
+      <button class="btn btn-primary" onclick="criarTecnico()">
+        <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
+        Criar Técnico
+      </button>
+    </div>
+  </section>
 </main>
 
-<!-- Toast -->
 <div class="toast" id="toast">
   <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
-  <span id="toastMsg">Alterações guardadas!</span>
+  <span id="toastMsg">Operação realizada!</span>
 </div>
 
 <script>
   lucide.createIcons();
+  const API = 'http://localhost/Aguas-Alertas/Backend/backend';
 
-  // Auth guard
-  if (sessionStorage.getItem('adminAuth') !== 'true') {
+  if (sessionStorage.getItem('adminAuth') !== 'true' || sessionStorage.getItem('userRole') !== 'admin') {
     window.location.href = 'login.html';
   }
 
-  function handleSair(e) {
-    e.preventDefault();
-    sessionStorage.removeItem('adminAuth');
-    window.location.href = 'login.html';
-  }
+  document.getElementById('userNome').textContent = sessionStorage.getItem('userNome') || '—';
+  function getToken() { return sessionStorage.getItem('token'); }
+
+  function handleSair(e) { e.preventDefault(); sessionStorage.clear(); window.location.href = 'login.html'; }
 
   function openTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(name).classList.add('active');
-  }
-
-  // Rio data
-  const rioData = {
-    douro:    { nome: 'Rio Douro',    nivel: 4.2,  limite: 5,   prec: 12, temp: 22 },
-    tejo:     { nome: 'Rio Tejo',     nivel: 3.8,  limite: 4.5, prec: 8,  temp: 20 },
-    mondego:  { nome: 'Rio Mondego',  nivel: 5.1,  limite: 5,   prec: 30, temp: 18 },
-    minho:    { nome: 'Rio Minho',    nivel: 2.5,  limite: 4,   prec: 5,  temp: 16 },
-    guadiana: { nome: 'Rio Guadiana', nivel: 1.9,  limite: 3.5, prec: 3,  temp: 25 },
-  };
-
-  function loadRio() {
-    const key = document.getElementById('rioSelect').value;
-    const d = rioData[key];
-    document.getElementById('editTitle').textContent = 'Editar Dados do ' + d.nome;
-    document.getElementById('fNivel').value  = d.nivel;
-    document.getElementById('fLimite').value = d.limite;
-    document.getElementById('fPrec').value   = d.prec;
-    document.getElementById('fTemp').value   = d.temp;
-    updatePreview();
-  }
-
-  function updatePreview() {
-    const n = parseFloat(document.getElementById('fNivel').value) || 0;
-    const p = parseFloat(document.getElementById('fPrec').value)  || 0;
-    const t = parseFloat(document.getElementById('fTemp').value)  || 0;
-    document.getElementById('pvNivel').innerHTML = n.toFixed(2) + ' <span>m</span>';
-    document.getElementById('pvPrec').innerHTML  = p.toFixed(1) + ' <span>mm</span>';
-    document.getElementById('pvTemp').innerHTML  = t.toFixed(1) + ' <span>°C</span>';
-  }
-
-  function guardarAlteracoes() {
-    const key = document.getElementById('rioSelect').value;
-    rioData[key].nivel  = parseFloat(document.getElementById('fNivel').value)  || 0;
-    rioData[key].limite = parseFloat(document.getElementById('fLimite').value) || 0;
-    rioData[key].prec   = parseFloat(document.getElementById('fPrec').value)   || 0;
-    rioData[key].temp   = parseFloat(document.getElementById('fTemp').value)   || 0;
-    showToast('Alterações guardadas com sucesso!');
-  }
-
-  // Alerts
-  let alerts = [
-    { id: 1, regiao: 'Rio Douro — Porto',   nivel: 4.8,  desc: 'Nível da água subiu 0.5m',          tipo: 'warning' },
-    { id: 2, regiao: 'Rio Tejo — Lisboa',   nivel: 4.2,  desc: 'Precipitação intensa registada',     tipo: 'info'    },
-  ];
-  let nextId = 3;
-
-  function renderAlerts() {
-    const list = document.getElementById('alertList');
-    document.getElementById('alertCount').textContent = '(' + alerts.length + ')';
-    if (alerts.length === 0) {
-      list.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:14px;padding:16px 0;">Nenhum alerta ativo.</p>';
-      return;
-    }
-    list.innerHTML = alerts.map(a => `
-      <div class="alert-item ${a.tipo}">
-        <div class="alert-item-info">
-          <h4>
-            ${a.regiao}
-            <span class="badge badge-${a.tipo}">${a.tipo === 'warning' ? 'AVISO' : a.tipo === 'danger' ? 'CRÍTICO' : 'INFO'}</span>
-          </h4>
-          <p>${a.desc}</p>
-          <span class="nivel">Nível: ${a.nivel.toFixed(2)}m</span>
-        </div>
-        <button class="btn-delete" onclick="deleteAlert(${a.id})" title="Remover alerta">
-          <i data-lucide="trash-2" style="width:17px;height:17px;"></i>
-        </button>
-      </div>
-    `).join('');
-    lucide.createIcons();
-  }
-
-  function adicionarAlerta() {
-    const regiao = document.getElementById('aRegiao').value.trim();
-    const nivel  = parseFloat(document.getElementById('aNivel').value) || 0;
-    const desc   = document.getElementById('aDesc').value.trim();
-    const tipo   = document.getElementById('aTipo').value;
-
-    if (!regiao || !desc) {
-      showToast('Preencha a região e a descrição.', true);
-      return;
-    }
-
-    alerts.unshift({ id: nextId++, regiao, nivel, desc, tipo });
-    renderAlerts();
-
-    document.getElementById('aRegiao').value = '';
-    document.getElementById('aNivel').value  = '0';
-    document.getElementById('aDesc').value   = '';
-    document.getElementById('aTipo').value   = 'info';
-
-    showToast('Alerta adicionado com sucesso!');
-  }
-
-  function deleteAlert(id) {
-    alerts = alerts.filter(a => a.id !== id);
-    renderAlerts();
-    showToast('Alerta removido.');
+    if (name === 'utilizadores') loadUtilizadores();
   }
 
   function showToast(msg, error = false) {
     const t = document.getElementById('toast');
     document.getElementById('toastMsg').textContent = msg;
-    t.style.background = error ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)';
-    t.style.borderColor = error ? 'rgba(239,68,68,0.35)' : 'rgba(34,197,94,0.35)';
-    t.style.color = error ? '#fca5a5' : '#4ade80';
+    t.className = 'toast' + (error ? ' error' : '');
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
-  // Init
-  updatePreview();
-  renderAlerts();
-</script>
+  async function loadEstatisticas() {
+    try {
+      const res = await fetch(`${API}/api/private/admin/estatisticas.php`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        document.getElementById('sEstacoes').textContent = data.data.total_estacoes;
+        document.getElementById('sAlertas').textContent  = data.data.alertas_ativos;
+        document.getElementById('sNivel').textContent    = data.data.media_nivel_agua + 'm';
+        document.getElementById('sUsers').textContent    = data.data.total_utilizadores;
+      }
+    } catch(e) { console.error(e); }
+  }
 
+  async function loadChart() {
+    try {
+      const res = await fetch(`${API}/api/public/ultima_leitura.php`);
+      const data = await res.json();
+      if (data.status === 'ok') {
+        const labels = data.data.map(e => e.nome);
+        const valores = data.data.map(e => e.nivel_agua);
+        const cores = valores.map(v => v > 4.5 ? 'rgba(239,68,68,0.7)' : v > 3.5 ? 'rgba(249,115,22,0.7)' : 'rgba(59,130,246,0.7)');
+        new Chart(document.getElementById('statsChart'), {
+          type: 'bar',
+          data: { labels, datasets: [{ data: valores, backgroundColor: cores, borderRadius: 6 }] },
+          options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }, y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } } } }
+        });
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadUtilizadores() {
+    const list = document.getElementById('userList');
+    list.innerHTML = '<p class="loading">A carregar...</p>';
+    try {
+      const res = await fetch(`${API}/api/private/admin/listar_utilizadores.php`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const data = await res.json();
+      document.getElementById('userCount').textContent = data.total_utilizadores || 0;
+      if (!data.data || data.data.length === 0) { list.innerHTML = '<p class="loading">Nenhum utilizador.</p>'; return; }
+      list.innerHTML = data.data.map(u => `
+        <div class="user-item">
+          <div class="user-item-left">
+            <div class="avatar ${u.role}">${u.nome.charAt(0).toUpperCase()}</div>
+            <div><div class="user-nome">${u.nome}</div><div class="user-email">${u.email}</div></div>
+            <span class="role-tag ${u.role}">${u.role.toUpperCase()}</span>
+          </div>
+          ${u.role === 'tecnico' ? `<button class="btn-icon" onclick="eliminarUtilizador(${u.id_utilizador}, '${u.nome}')"><i data-lucide="trash-2" style="width:17px;height:17px;"></i></button>` : ''}
+        </div>`).join('');
+      lucide.createIcons();
+    } catch(e) { list.innerHTML = '<p class="loading">Erro ao carregar.</p>'; }
+  }
+
+  async function eliminarUtilizador(id, nome) {
+    if (!confirm(`Eliminar o técnico "${nome}"?`)) return;
+    const fd = new FormData(); fd.append('id_utilizador', id);
+    const res = await fetch(`${API}/api/private/admin/eliminar_utilizador.php`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+    const data = await res.json();
+    if (data.status === 'ok') { showToast('Técnico eliminado!'); loadUtilizadores(); }
+    else showToast(data.mensagem, true);
+  }
+
+  async function criarTecnico() {
+    const nome = document.getElementById('cNome').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const password = document.getElementById('cPassword').value;
+    if (!nome || !email || !password) { showToast('Preencha todos os campos.', true); return; }
+    const fd = new FormData(); fd.append('nome', nome); fd.append('email', email); fd.append('password', password);
+    const res = await fetch(`${API}/api/private/admin/criar_tecnico.php`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+    const data = await res.json();
+    if (data.status === 'ok') { showToast('Técnico criado!'); document.getElementById('cNome').value = ''; document.getElementById('cEmail').value = ''; document.getElementById('cPassword').value = ''; }
+    else showToast(data.mensagem, true);
+  }
+
+  loadEstatisticas();
+  loadChart();
+</script>
 </body>
 </html>

@@ -1,186 +1,80 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
   <meta charset="UTF-8">
   <title>Dashboard — Águas Alerta</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-      background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%);
-      color: white;
-      padding: 36px 40px;
-    }
-
+    body { font-family: 'Roboto', sans-serif; min-height: 100vh; background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%); color: white; padding: 36px 40px; }
     .page { max-width: 1100px; margin: 0 auto; }
-
-    .back {
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 22px;
-      transition: color 0.2s;
-    }
+    .back { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; transition: color 0.2s; }
     .back:hover { color: white; }
-
     .page-title h1 { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 700; }
-    .page-title p  { margin-top: 6px; color: rgba(255,255,255,0.55); font-size: 16px; }
-
+    .page-title p { margin-top: 6px; color: rgba(255,255,255,0.55); font-size: 16px; }
     .line { height: 1px; background: rgba(255,255,255,0.1); margin: 22px 0; }
 
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 28px;
-    }
-    .tab {
-      background: none; border: none;
-      color: rgba(255,255,255,0.55);
-      font-family: 'Roboto', sans-serif;
-      font-size: 15px; font-weight: 700;
-      padding: 14px 24px;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 3px solid transparent;
-      transition: color 0.2s;
-    }
-    .tab.active { color: white; border-bottom-color: #3b82f6; }
+    .estacao-selector { margin-bottom: 24px; }
+    .estacao-selector label { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 8px; }
+    select { width: 100%; max-width: 380px; padding: 12px 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; color: white; font-family: 'Roboto', sans-serif; font-size: 15px; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 38px; }
+    select option { background: #0f1f6e; }
 
+    .tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 28px; }
+    .tab { background: none; border: none; color: rgba(255,255,255,0.55); font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 24px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid transparent; transition: color 0.2s; }
+    .tab.active { color: white; border-bottom-color: #3b82f6; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Alert banner */
-    .alert-banner {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 20px 22px;
-      display: flex; align-items: center; gap: 18px;
-      margin-bottom: 24px;
-    }
-    .alert-icon {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: rgba(34,197,94,0.15);
-      color: #22c55e;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
+    .alert-banner { border-radius: 12px; padding: 20px 22px; display: flex; align-items: center; gap: 18px; margin-bottom: 24px; transition: all 0.3s; }
+    .alert-banner.ok { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+    .alert-banner.danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); }
+    .alert-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .alert-icon.ok { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .alert-icon.danger { background: rgba(239,68,68,0.2); color: #f87171; }
     .alert-banner h3 { font-size: 15px; margin-bottom: 3px; }
-    .alert-banner p  { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700; }
+    .alert-banner p { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700; }
 
-    /* Cards */
     .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 24px; }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 22px;
-    }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; }
     .card-label { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 10px; }
     .card-value { font-size: 34px; font-weight: 500; margin-bottom: 6px; }
     .card-value span { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.5); margin-left: 4px; }
     .card-sub { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 18px; }
 
-    /* Level bar */
     .level-bar-wrap { margin-top: 4px; }
-    .level-bar-track {
-      position: relative;
-      height: 8px;
-      border-radius: 99px;
-      background: rgba(255,255,255,0.1);
-      overflow: visible;
-      margin-bottom: 10px;
-    }
-    .level-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.8s cubic-bezier(0.22,1,0.36,1), background 0.4s;
-    }
-    /* Threshold markers */
-    .marker {
-      position: absolute;
-      top: -3px;
-      width: 2px;
-      height: 14px;
-      border-radius: 2px;
-    }
+    .level-bar-track { position: relative; height: 8px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: visible; margin-bottom: 10px; }
+    .level-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1), background 0.4s; }
+    .marker { position: absolute; top: -3px; width: 2px; height: 14px; border-radius: 2px; }
     .marker-warning { background: #f97316; }
-    .marker-danger  { background: #ef4444; }
-
-    .bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.4);
-    }
+    .marker-danger { background: #ef4444; }
+    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); }
     .bar-labels .lbl-warning { color: #f97316; }
-    .bar-labels .lbl-danger  { color: #ef4444; }
+    .bar-labels .lbl-danger { color: #ef4444; }
 
-    /* Chart */
-    .chart-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 24px;
-    }
+    .chart-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; }
     .chart-box h3 { margin-bottom: 20px; font-size: 16px; }
 
-    /* Alerts tab */
     .alerts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
     .alerts-header h2 { font-size: 22px; }
     .alerts-header span { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700; }
-
     .alert-list { display: flex; flex-direction: column; gap: 14px; }
-    .alert-card {
-      border-radius: 10px; padding: 20px 22px;
-      display: flex; justify-content: space-between; align-items: flex-start;
-      border: 1px solid #2563ff;
-      background: rgba(37,99,255,0.1);
-    }
-    .alert-card.warning { border-color: #f97316; background: rgba(249,115,22,0.12); }
-    .alert-card.danger  { border-color: #ef4444; background: rgba(239,68,68,0.12); }
-
+    .alert-card { border-radius: 10px; padding: 20px 22px; display: flex; justify-content: space-between; align-items: flex-start; border: 1px solid #ef4444; background: rgba(239,68,68,0.12); }
+    .alert-card.ok { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); }
     .alert-left { display: flex; gap: 14px; }
-    .alert-round {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
+    .alert-round { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .alert-info h3 { font-size: 16px; margin-bottom: 8px; }
-    .alert-info p  { color: rgba(255,255,255,0.75); font-weight: 700; font-size: 14px; margin-bottom: 8px; }
-    .level-txt     { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 700; }
-    .badge {
-      display: inline-block;
-      background: #ef4444; color: white;
-      padding: 3px 8px; border-radius: 5px;
-      font-size: 11px; font-weight: 700; margin-left: 8px;
-    }
-    .badge.warning { background: #f97316; }
+    .alert-info p { color: rgba(255,255,255,0.75); font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+    .level-txt { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 700; }
+    .badge { display: inline-block; background: #ef4444; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; margin-left: 8px; }
     .time { color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .loading { color: rgba(255,255,255,0.4); font-size: 14px; padding: 20px 0; }
 
     @media (max-width: 800px) { .cards { grid-template-columns: 1fr; } }
   </style>
 </head>
-
 <body>
-
 <main class="page">
 
   <a href="../index.html" class="back">
@@ -189,11 +83,18 @@
   </a>
 
   <div class="page-title">
-    <h1>Monitoramento do Rio Douro</h1>
+    <h1 id="pageTitle">Monitoramento de Estações</h1>
     <p>Sistema de vigilância e alertas hidrológicos</p>
   </div>
 
   <div class="line"></div>
+
+  <div class="estacao-selector">
+    <label>Selecionar Estação</label>
+    <select id="estacaoSelect" onchange="loadEstacao()">
+      <option value="">— A carregar estações... —</option>
+    </select>
+  </div>
 
   <div class="tabs">
     <button class="tab active" onclick="openTab('dashboard', this)">Dashboard</button>
@@ -206,81 +107,58 @@
   <!-- DASHBOARD TAB -->
   <section id="dashboard" class="tab-content active">
 
-    <div class="alert-banner">
-      <div class="alert-icon">
+    <div class="alert-banner ok" id="alertBanner">
+      <div class="alert-icon ok" id="alertIcon">
         <i data-lucide="activity" style="width:20px;height:20px;"></i>
       </div>
       <div>
-        <h3>Sem alertas ativos</h3>
-        <p>Todos os rios dentro dos níveis normais</p>
+        <h3 id="alertTitle">Sem alertas ativos</h3>
+        <p id="alertSubtitle">Estação dentro dos níveis normais</p>
       </div>
     </div>
 
     <div class="cards">
-
-      <!-- Nível do Rio -->
       <div class="card">
         <div class="card-label">Nível do Rio</div>
-        <div class="card-value">4.18 <span>m</span></div>
-        <div class="card-sub">Limite: 5m</div>
+        <div class="card-value" id="valNivel">— <span>m</span></div>
+        <div class="card-sub" id="subNivel">Limite: —</div>
         <div class="level-bar-wrap">
           <div class="level-bar-track">
-            <!-- fill: 4.18/6 = 69.7% -->
-            <div class="level-bar-fill" id="barRio" style="width:69.7%; background: #22c55e;"></div>
-            <!-- warning at 5m = 83.3%, danger at 5.5m = 91.7% -->
-            <div class="marker marker-warning" style="left:83.3%;"></div>
-            <div class="marker marker-danger"  style="left:91.7%;"></div>
+            <div class="level-bar-fill" id="barNivel" style="width:0%;background:#22c55e;"></div>
+            <div class="marker marker-warning" id="mwNivel" style="left:75%;"></div>
+            <div class="marker marker-danger" id="mdNivel" style="left:100%;"></div>
           </div>
           <div class="bar-labels">
-            <span>Seguro: &lt; 5m</span>
-            <span class="lbl-warning">Aviso: 5m</span>
-            <span class="lbl-danger">Crítico: 5.5m</span>
+            <span id="lblNivelOk">Seguro</span>
+            <span class="lbl-warning" id="lblNivelWarn">Aviso</span>
+            <span class="lbl-danger" id="lblNivelDanger">Crítico</span>
           </div>
         </div>
       </div>
 
-      <!-- Precipitação -->
       <div class="card">
-        <div class="card-label">Precipitação</div>
-        <div class="card-value">11.9 <span>mm</span></div>
-        <div class="card-sub">Últimas 24h</div>
-        <div class="level-bar-wrap">
-          <div class="level-bar-track">
-            <!-- fill: 11.9/60 = 19.8% -->
-            <div class="level-bar-fill" id="barPrec" style="width:19.8%; background: #22c55e;"></div>
-            <!-- warning 25mm = 41.7%, danger 40mm = 66.7% -->
-            <div class="marker marker-warning" style="left:41.7%;"></div>
-            <div class="marker marker-danger"  style="left:66.7%;"></div>
-          </div>
-          <div class="bar-labels">
-            <span>Normal: &lt; 25mm</span>
-            <span class="lbl-warning">Aviso: 25mm</span>
-            <span class="lbl-danger">Crítico: 40mm</span>
-          </div>
-        </div>
+        <div class="card-label">Última Leitura</div>
+        <div class="card-value" id="valTimestamp">—</div>
+        <div class="card-sub">Timestamp</div>
       </div>
 
-      <!-- Temperatura -->
       <div class="card">
         <div class="card-label">Temperatura</div>
-        <div class="card-value">22.0 <span>°C</span></div>
+        <div class="card-value" id="valTemp">— <span>°C</span></div>
         <div class="card-sub">Atual</div>
         <div class="level-bar-wrap">
           <div class="level-bar-track">
-            <!-- fill: 22/40 = 55% -->
-            <div class="level-bar-fill" id="barTemp" style="width:55%; background: #22c55e;"></div>
-            <!-- warning 28°C = 70%, danger 35°C = 87.5% -->
+            <div class="level-bar-fill" id="barTempFill" style="width:0%;background:#22c55e;"></div>
             <div class="marker marker-warning" style="left:70%;"></div>
-            <div class="marker marker-danger"  style="left:87.5%;"></div>
+            <div class="marker marker-danger" style="left:87.5%;"></div>
           </div>
           <div class="bar-labels">
-            <span>Normal: &lt; 28°C</span>
+            <span>Normal: &lt;28°C</span>
             <span class="lbl-warning">Aviso: 28°C</span>
             <span class="lbl-danger">Crítico: 35°C</span>
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="chart-box">
@@ -292,74 +170,12 @@
 
   <!-- ALERTAS TAB -->
   <section id="alertas" class="tab-content">
-
     <div class="alerts-header">
-      <h2>Histórico de Alertas</h2>
-      <span>Últimas 12 horas</span>
+      <h2>Alertas Ativos</h2>
+      <span id="alertasTotal">A carregar...</span>
     </div>
-
-    <div class="alert-list">
-
-      <div class="alert-card warning">
-        <div class="alert-left">
-          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;"></i></div>
-          <div class="alert-info">
-            <h3>Rio Douro — Porto</h3>
-            <p>Nível da água subiu 0.5m</p>
-            <span class="level-txt">Nível: 4.80m <span class="badge warning">AVISO</span></span>
-          </div>
-        </div>
-        <span class="time">há 2 horas</span>
-      </div>
-
-      <div class="alert-card">
-        <div class="alert-left">
-          <div class="alert-round"><i data-lucide="bell" style="width:16px;height:16px;"></i></div>
-          <div class="alert-info">
-            <h3>Rio Douro — Vila Nova de Gaia</h3>
-            <p>Temperatura da água aumentou rapidamente</p>
-            <span class="level-txt">Nível: 4.50m</span>
-          </div>
-        </div>
-        <span class="time">há 8 horas</span>
-      </div>
-
-      <div class="alert-card danger">
-        <div class="alert-left">
-          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;"></i></div>
-          <div class="alert-info">
-            <h3>Rio Douro — Peso da Régua</h3>
-            <p>Alerta de cheias ativado</p>
-            <span class="level-txt">Nível: 5.20m <span class="badge">CRÍTICO</span></span>
-          </div>
-        </div>
-        <span class="time">há 11 horas</span>
-      </div>
-
-      <div class="alert-card danger">
-        <div class="alert-left">
-          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;"></i></div>
-          <div class="alert-info">
-            <h3>Rio Mondego — Coimbra</h3>
-            <p>Nível da água atingiu limite de segurança</p>
-            <span class="level-txt">Nível: 5.00m <span class="badge">CRÍTICO</span></span>
-          </div>
-        </div>
-        <span class="time">há 6 horas</span>
-      </div>
-
-      <div class="alert-card">
-        <div class="alert-left">
-          <div class="alert-round"><i data-lucide="bell" style="width:16px;height:16px;"></i></div>
-          <div class="alert-info">
-            <h3>Rio Mondego — Figueira da Foz</h3>
-            <p>Precipitação moderada registada</p>
-            <span class="level-txt">Nível: 4.10m</span>
-          </div>
-        </div>
-        <span class="time">há 7 horas</span>
-      </div>
-
+    <div class="alert-list" id="alertList">
+      <p class="loading">A carregar alertas...</p>
     </div>
   </section>
 
@@ -368,36 +184,211 @@
 <script>
   lucide.createIcons();
 
+  const API = 'http://localhost/Aguas-Alertas/Backend/backend';
+  let waterChart = null;
+  let alertasAtivos = [];
 
   function openTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(name).classList.add('active');
+    if (name === 'alertas') renderAlertas();
   }
 
-  // Chart
-  new Chart(document.getElementById('waterChart'), {
-    type: 'line',
-    data: {
-      labels: ['00:00','03:00','06:00','09:00','12:00','15:00','18:00','21:00'],
-      datasets: [{
-        data: [3.2, 3.5, 3.8, 4.0, 4.2, 4.5, 4.8, 5.0],
-        borderColor: '#60a5fa',
-        backgroundColor: 'rgba(96,165,250,0.15)',
-        tension: 0.4, fill: true,
-        pointBackgroundColor: '#60a5fa'
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } },
-        y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
-      }
-    }
-  });
-</script>
+  // Verifica se a estação tem alerta ativo
+  function verificarAlertaEstacao(id) {
+    return alertasAtivos.some(a => String(a.id_estacao) === String(id));
+  }
 
+  // Carregar alertas ativos globalmente
+  async function loadAlertasAtivos() {
+    try {
+      const res = await fetch(`${API}/api/public/alertas_ativos.php`);
+      const data = await res.json();
+      alertasAtivos = data.data || [];
+    } catch(e) { alertasAtivos = []; }
+  }
+
+  // Carregar estações no select
+  async function loadEstacoes() {
+    try {
+      const res = await fetch(`${API}/api/public/ultima_leitura.php`);
+      const data = await res.json();
+      const sel = document.getElementById('estacaoSelect');
+      sel.innerHTML = '<option value="">— Selecione uma estação —</option>';
+      if (data.status === 'ok') {
+        data.data.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id_estacao;
+          opt.textContent = e.nome;
+          opt.dataset.nivel = e.nivel_agua;
+          opt.dataset.temp  = e.temperatura;
+          opt.dataset.ts    = e.timestamp;
+          sel.appendChild(opt);
+        });
+        if (data.data.length > 0) {
+          sel.value = data.data[0].id_estacao;
+          loadEstacao();
+        }
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadEstacao() {
+    const sel = document.getElementById('estacaoSelect');
+    const id  = sel.value;
+    if (!id) return;
+
+    const opt   = sel.options[sel.selectedIndex];
+    const nivel = parseFloat(opt.dataset.nivel) || 0;
+    const temp  = parseFloat(opt.dataset.temp)  || 0;
+    const ts    = opt.dataset.ts || '—';
+    const limite = 5.0; // valor padrão, ajusta se tiveres o nivel_max_seguranca no endpoint
+
+    // Verificar alerta ativo para esta estação
+    const emAlerta = verificarAlertaEstacao(id);
+
+    // Título
+    document.getElementById('pageTitle').textContent = 'Monitoramento — ' + opt.textContent;
+
+    // Banner
+    const banner = document.getElementById('alertBanner');
+    const icon   = document.getElementById('alertIcon');
+    if (emAlerta) {
+      banner.className = 'alert-banner danger';
+      icon.className   = 'alert-icon danger';
+      icon.innerHTML   = '<i data-lucide="triangle-alert" style="width:20px;height:20px;"></i>';
+      document.getElementById('alertTitle').textContent    = 'Alerta ativo nesta estação!';
+      document.getElementById('alertSubtitle').textContent = `Nível atual: ${nivel.toFixed(2)}m — situação crítica`;
+    } else {
+      banner.className = 'alert-banner ok';
+      icon.className   = 'alert-icon ok';
+      icon.innerHTML   = '<i data-lucide="activity" style="width:20px;height:20px;"></i>';
+      document.getElementById('alertTitle').textContent    = 'Sem alertas ativos';
+      document.getElementById('alertSubtitle').textContent = 'Estação dentro dos níveis normais';
+    }
+    lucide.createIcons();
+
+    // Card Nível
+    document.getElementById('valNivel').innerHTML = nivel.toFixed(2) + ' <span>m</span>';
+    document.getElementById('subNivel').textContent = `Limite: ${limite}m`;
+    const maxBarra = limite * 1.2;
+    const pctNivel = Math.min((nivel / maxBarra) * 100, 100);
+    const corNivel = nivel >= limite ? '#ef4444' : nivel >= limite * 0.85 ? '#f97316' : '#22c55e';
+    document.getElementById('barNivel').style.width      = pctNivel + '%';
+    document.getElementById('barNivel').style.background = corNivel;
+    document.getElementById('mwNivel').style.left = ((limite * 0.85 / maxBarra) * 100) + '%';
+    document.getElementById('mdNivel').style.left = ((limite / maxBarra) * 100) + '%';
+    document.getElementById('lblNivelOk').textContent      = `Seguro: <${(limite * 0.85).toFixed(1)}m`;
+    document.getElementById('lblNivelWarn').textContent    = `Aviso: ${(limite * 0.85).toFixed(1)}m`;
+    document.getElementById('lblNivelDanger').textContent  = `Crítico: ${limite}m`;
+
+    // Card Timestamp
+    document.getElementById('valTimestamp').textContent = ts.split(' ')[1]?.substring(0,5) || '—';
+
+    // Card Temperatura
+    document.getElementById('valTemp').innerHTML = temp.toFixed(1) + ' <span>°C</span>';
+    const pctTemp = Math.min((temp / 40) * 100, 100);
+    const corTemp = temp >= 35 ? '#ef4444' : temp >= 28 ? '#f97316' : '#22c55e';
+    document.getElementById('barTempFill').style.width      = pctTemp + '%';
+    document.getElementById('barTempFill').style.background = corTemp;
+
+    // Gráfico
+    loadGrafico(id);
+  }
+
+  async function loadGrafico(id) {
+  try {
+    const res = await fetch(`${API}/api/public/historico.php`);
+    const data = await res.json();
+
+    let labels = [], valores = [];
+
+    if (data.status === 'ok' && data.data && data.data.length > 0) {
+      const filtrado = data.data
+        .filter(d => d.nome === document.getElementById('estacaoSelect').options[document.getElementById('estacaoSelect').selectedIndex].textContent)
+        .reverse();
+
+      labels  = filtrado.map(d => d.timestamp.split(' ')[1]?.substring(0,5) || '');
+      valores = filtrado.map(d => parseFloat(d.nivel_agua));
+    }
+
+    if (waterChart) waterChart.destroy();
+    waterChart = new Chart(document.getElementById('waterChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: valores,
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96,165,250,0.15)',
+          tension: 0.4, fill: true,
+          pointBackgroundColor: '#60a5fa',
+          pointRadius: 3
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: 'rgba(255,255,255,0.55)', maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+          y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+        }
+      }
+    });
+  } catch(e) { console.error(e); }
+}
+
+  function renderAlertas() {
+    const list = document.getElementById('alertList');
+    document.getElementById('alertasTotal').textContent = `${alertasAtivos.length} alerta(s) ativo(s)`;
+
+    if (alertasAtivos.length === 0) {
+      list.innerHTML = `
+        <div class="alert-card ok">
+          <div class="alert-left">
+            <div class="alert-round"><i data-lucide="check" style="width:16px;height:16px;color:#4ade80;"></i></div>
+            <div class="alert-info">
+              <h3>Sem alertas ativos</h3>
+              <p>Todas as estações dentro dos níveis normais</p>
+            </div>
+          </div>
+        </div>`;
+      lucide.createIcons();
+      return;
+    }
+
+    list.innerHTML = alertasAtivos.map(a => `
+      <div class="alert-card">
+        <div class="alert-left">
+          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;color:#f87171;"></i></div>
+          <div class="alert-info">
+            <h3>${a.nome_estacao}</h3>
+            <p>${a.localizacao}</p>
+            <span class="level-txt">Nível crítico: ${a.nivel_critico}m <span class="badge">CRÍTICO</span></span>
+          </div>
+        </div>
+        <span class="time">${a.data_hora}</span>
+      </div>`).join('');
+    lucide.createIcons();
+  }
+
+  // Init
+  async function init() {
+    await loadAlertasAtivos();
+    await loadEstacoes();
+    renderAlertas();
+  }
+
+  init();
+
+  // Auto-refresh a cada 30 segundos
+  setInterval(async () => {
+    await loadAlertasAtivos();
+    const id = document.getElementById('estacaoSelect').value;
+    if (id) loadEstacao();
+    renderAlertas();
+  }, 30000);
+</script>
 </body>
 </html>

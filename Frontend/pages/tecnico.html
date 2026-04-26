@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Técnico — Águas Alerta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; min-height: 100vh; background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%); color: white; padding: 36px 40px; }
+    .page { max-width: 1100px; margin: 0 auto; }
+    .back { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; transition: color 0.2s; }
+    .back:hover { color: white; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .page-title h1 { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 700; }
+    .page-title p { margin-top: 6px; color: rgba(255,255,255,0.5); font-size: 16px; }
+    .user-badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .user-badge span { color: rgba(255,255,255,0.6); }
+    .role-pill { background: rgba(59,130,246,0.25); border: 1px solid rgba(59,130,246,0.4); color: #93c5fd; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+    .line { height: 1px; background: rgba(255,255,255,0.1); margin: 22px 0; }
+    .tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 28px; flex-wrap: wrap; }
+    .tab { background: none; border: none; color: rgba(255,255,255,0.5); font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 22px; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.2s; display: flex; align-items: center; gap: 8px; }
+    .tab.active { color: white; border-bottom-color: #3b82f6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .section-block { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
+    .section-block h2 { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .field-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    select, input[type="number"], input[type="text"], textarea {
+      width: 100%; padding: 12px 14px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px; color: white; font-family: 'Roboto', sans-serif; font-size: 15px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 38px; appearance: none; }
+    select option { background: #0f1f6e; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(59,130,246,0.7); background: rgba(59,130,246,0.07); }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.28); }
+    textarea { resize: vertical; min-height: 90px; }
+    .btn { padding: 11px 20px; border-radius: 9px; border: none; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, transform 0.12s; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-warning { background: rgba(249,115,22,0.2); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+    .btn-warning:hover { background: rgba(249,115,22,0.3); }
+    .btn-success { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .btn-success:hover { background: rgba(34,197,94,0.3); }
+
+    /* Stats cards */
+    .mini-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+    .mini-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 18px; }
+    .mini-card .lbl { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+    .mini-card .val { font-size: 28px; font-weight: 500; }
+    .mini-card .val span { font-size: 14px; color: rgba(255,255,255,0.5); margin-left: 3px; }
+
+    /* Level bar */
+    .level-bar-wrap { margin-top: 16px; }
+    .level-bar-track { position: relative; height: 8px; border-radius: 99px; background: rgba(255,255,255,0.1); margin-bottom: 8px; }
+    .level-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .marker { position: absolute; top: -3px; width: 2px; height: 14px; border-radius: 2px; }
+    .marker-warning { background: #f97316; }
+    .marker-danger { background: #ef4444; }
+    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); }
+    .bar-labels .lbl-warning { color: #f97316; }
+    .bar-labels .lbl-danger { color: #ef4444; }
+
+    /* Alertas list */
+    .alert-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+    .alert-item.warning { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.08); }
+    .alert-item.danger { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+    .alert-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .alert-item h4 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+    .badge-danger { background: #ef4444; color: white; }
+    .badge-warning { background: #f97316; color: white; }
+    .badge-info { background: #3b82f6; color: white; }
+    .alert-meta { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    /* Obs list */
+    .obs-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; }
+    .obs-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .obs-tecnico { font-size: 13px; font-weight: 700; color: #60a5fa; }
+    .obs-data { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .obs-texto { font-size: 14px; color: rgba(255,255,255,0.8); }
+
+    /* Email list */
+    .email-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; }
+    .email-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .email-para { font-size: 14px; font-weight: 700; color: #60a5fa; }
+    .email-data { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .email-assunto { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .email-msg { font-size: 13px; color: rgba(255,255,255,0.6); white-space: pre-line; }
+
+    .loading { color: rgba(255,255,255,0.4); font-size: 14px; padding: 20px 0; }
+    .analise-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+
+    .chart-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; margin-top: 24px; }
+    .chart-box h3 { margin-bottom: 20px; font-size: 16px; }
+
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); border-radius: 10px; padding: 12px 22px; color: #4ade80; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; z-index: 999; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
+
+    @media (max-width: 800px) { .mini-stats { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main class="page">
+  <a href="#" class="back" onclick="handleSair(event)">
+    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    Sair
+  </a>
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Painel Técnico</h1>
+      <p>Monitorização e gestão operacional das estações</p>
+    </div>
+    <div class="user-badge">
+      <i data-lucide="user-circle" style="width:18px;height:18px;color:rgba(255,255,255,0.5);"></i>
+      <span id="userNome">—</span>
+      <span class="role-pill">TÉCNICO</span>
+    </div>
+  </div>
+  <div class="line"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="openTab('dashboard', this)">
+      <i data-lucide="activity" style="width:15px;height:15px;"></i>
+      Dashboard
+    </button>
+    <button class="tab" onclick="openTab('alertas', this)">
+      <i data-lucide="bell" style="width:15px;height:15px;"></i>
+      Alertas
+    </button>
+    <button class="tab" onclick="openTab('observacoes', this)">
+      <i data-lucide="clipboard" style="width:15px;height:15px;"></i>
+      Observações
+    </button>
+    <button class="tab" onclick="openTab('historico', this)">
+      <i data-lucide="clock" style="width:15px;height:15px;"></i>
+      Histórico
+    </button>
+    <button class="tab" onclick="openTab('emails', this)">
+      <i data-lucide="mail" style="width:15px;height:15px;"></i>
+      Emails
+    </button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="tab-content active">
+    <div class="section-block">
+      <h2>Selecionar Estação</h2>
+      <select id="estacaoSelect" onchange="loadDashboard()">
+        <option value="">— Selecione uma estação —</option>
+      </select>
+    </div>
+
+    <div id="dashContent" style="display:none;">
+      <div class="analise-box" id="analiseBox">
+        <i data-lucide="trending-up" style="width:18px;height:18px;"></i>
+        <span id="analiseTexto">A analisar...</span>
+      </div>
+
+      <div class="mini-stats">
+        <div class="mini-card">
+          <div class="lbl">Nível Atual</div>
+          <div class="val" id="dNivel">— <span>m</span></div>
+          <div class="level-bar-wrap">
+            <div class="level-bar-track">
+              <div class="level-bar-fill" id="barNivel" style="width:0%;background:#22c55e;"></div>
+              <div class="marker marker-warning" id="mWarning" style="left:70%;"></div>
+              <div class="marker marker-danger" id="mDanger" style="left:90%;"></div>
+            </div>
+            <div class="bar-labels">
+              <span>Seguro</span>
+              <span class="lbl-warning">Aviso</span>
+              <span class="lbl-danger">Crítico</span>
+            </div>
+          </div>
+        </div>
+        <div class="mini-card"><div class="lbl">Média</div><div class="val" id="dMedia">— <span>m</span></div></div>
+        <div class="mini-card"><div class="lbl">Máximo</div><div class="val" id="dMax">— <span>m</span></div></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>Histórico de Leituras</h3>
+        <canvas id="dashChart" height="100"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALERTAS -->
+  <section id="alertas" class="tab-content">
+    <div class="section-block">
+      <h2>Alterar Nível Crítico de Alerta</h2>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">Estação</label>
+          <select id="aEstacao"><option value="">— Selecione —</option></select>
+        </div>
+        <div>
+          <label class="field-label">Novo Nível Crítico (m)</label>
+          <input type="number" id="aNivelCritico" step="0.1" min="0" placeholder="Ex: 5.0">
+        </div>
+      </div>
+      <button class="btn btn-warning" onclick="alterarAlerta()">
+        <i data-lucide="triangle-alert" style="width:16px;height:16px;"></i>
+        Atualizar Nível Crítico
+      </button>
+    </div>
+
+    <div class="section-block">
+      <h2>Alertas Ativos</h2>
+      <div id="alertasList"><p class="loading">A carregar...</p></div>
+    </div>
+  </section>
+
+  <!-- OBSERVAÇÕES -->
+  <section id="observacoes" class="tab-content">
+    <div class="section-block">
+      <h2>Registar Observação</h2>
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div>
+          <label class="field-label">Estação</label>
+          <select id="oEstacao"><option value="">— Selecione —</option></select>
+        </div>
+      </div>
+      <label class="field-label">Observação</label>
+      <textarea id="oTexto" placeholder="Descreva a situação observada..."></textarea>
+      <button class="btn btn-success" style="margin-top:16px;" onclick="registarObservacao()">
+        <i data-lucide="save" style="width:16px;height:16px;"></i>
+        Registar Observação
+      </button>
+    </div>
+
+    <div class="section-block">
+      <h2>Observações Recentes</h2>
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Filtrar por estação</label>
+        <select id="oFiltroEstacao" onchange="loadObservacoes()"><option value="">— Selecione —</option></select>
+      </div>
+      <div id="obsList"><p class="loading">Selecione uma estação.</p></div>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="historico" class="tab-content">
+    <div class="section-block">
+      <h2>Histórico por Período</h2>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">Estação</label>
+          <select id="hEstacao"><option value="">— Selecione —</option></select>
+        </div>
+        <div>
+          <label class="field-label">Período (dias)</label>
+          <select id="hDias">
+            <option value="1">Último dia</option>
+            <option value="7" selected>Última semana</option>
+            <option value="14">Últimas 2 semanas</option>
+            <option value="30">Último mês</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="loadHistorico()">
+        <i data-lucide="search" style="width:16px;height:16px;"></i>
+        Ver Histórico
+      </button>
+    </div>
+    <div id="historicoResult"></div>
+  </section>
+
+  <!-- EMAILS -->
+  <section id="emails" class="tab-content">
+    <div class="section-block">
+      <h2>Emails de Alerta Enviados</h2>
+      <div id="emailsList"><p class="loading">A carregar...</p></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast">
+  <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+  <span id="toastMsg">Operação realizada!</span>
+</div>
+
+<script>
+  lucide.createIcons();
+  const API = 'http://localhost/Aguas-Alertas/Backend/backend';
+
+  if (sessionStorage.getItem('adminAuth') !== 'true' || sessionStorage.getItem('userRole') !== 'tecnico') {
+    window.location.href = 'login.html';
+  }
+
+  document.getElementById('userNome').textContent = sessionStorage.getItem('userNome') || '—';
+  function getToken() { return sessionStorage.getItem('token'); }
+  function handleSair(e) { e.preventDefault(); sessionStorage.clear(); window.location.href = 'login.html'; }
+
+  function openTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(name).classList.add('active');
+    if (name === 'alertas') loadAlertasAtivos();
+    if (name === 'emails') loadEmails();
+  }
+
+  function showToast(msg, error = false) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.className = 'toast' + (error ? ' error' : '');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  let dashChart = null;
+
+  // Carregar estações nos selects
+  async function loadEstacoes() {
+    try {
+      const res = await fetch(`${API}/api/public/ultima_leitura.php`);
+      const data = await res.json();
+      if (data.status !== 'ok') return;
+      const estacoes = data.data;
+      ['estacaoSelect','aEstacao','oEstacao','oFiltroEstacao','hEstacao'].forEach(id => {
+        const sel = document.getElementById(id);
+        estacoes.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id_estacao;
+          opt.textContent = e.nome;
+          sel.appendChild(opt);
+        });
+      });
+    } catch(e) { console.error(e); }
+  }
+
+  // DASHBOARD
+  async function loadDashboard() {
+    const id = document.getElementById('estacaoSelect').value;
+    if (!id) { document.getElementById('dashContent').style.display = 'none'; return; }
+    document.getElementById('dashContent').style.display = 'block';
+
+    try {
+      // Estatísticas
+      const r1 = await fetch(`${API}/api/private/tecnico/estatisticas_rio.php?id_estacao=${id}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const stats = await r1.json();
+      if (stats.status === 'ok') {
+        document.getElementById('dNivel').innerHTML = stats.data.nivel_atual.toFixed(2) + ' <span>m</span>';
+        document.getElementById('dMedia').innerHTML = stats.data.media.toFixed(2) + ' <span>m</span>';
+        document.getElementById('dMax').innerHTML   = stats.data.maximo.toFixed(2) + ' <span>m</span>';
+        const pct = Math.min((stats.data.nivel_atual / (stats.data.maximo * 1.2)) * 100, 100);
+        const cor = stats.data.nivel_atual > stats.data.maximo * 0.9 ? '#ef4444' : stats.data.nivel_atual > stats.data.maximo * 0.7 ? '#f97316' : '#22c55e';
+        document.getElementById('barNivel').style.width = pct + '%';
+        document.getElementById('barNivel').style.background = cor;
+      }
+
+      // Análise
+      const r2 = await fetch(`${API}/api/private/tecnico/analise_rio.php?id_estacao=${id}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const analise = await r2.json();
+      if (analise.status === 'ok') {
+        document.getElementById('analiseTexto').textContent = analise.analise;
+      }
+
+      // Gráfico leituras
+      const r3 = await fetch(`${API}/api/private/tecnico/historico_periodo.php?id_estacao=${id}&dias=1`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const hist = await r3.json();
+      if (hist.status === 'ok' && hist.data.length > 0) {
+        const labels = hist.data.map(d => d.timestamp.split(' ')[1].substring(0,5));
+        const valores = hist.data.map(d => d.nivel_agua);
+        if (dashChart) dashChart.destroy();
+        dashChart = new Chart(document.getElementById('dashChart'), {
+          type: 'line',
+          data: { labels, datasets: [{ data: valores, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.15)', tension: 0.4, fill: true, pointBackgroundColor: '#60a5fa' }] },
+          options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }, y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } } } }
+        });
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  // ALERTAS
+  async function loadAlertasAtivos() {
+    const list = document.getElementById('alertasList');
+    try {
+      const res = await fetch(`${API}/api/public/alertas_ativos.php`);
+      const data = await res.json();
+      if (!data.data || data.data.length === 0) { list.innerHTML = '<p class="loading">Sem alertas ativos.</p>'; return; }
+      list.innerHTML = data.data.map(a => `
+        <div class="alert-item danger">
+          <div class="alert-item-header">
+            <h4>${a.nome_estacao} <span class="badge badge-danger">ATIVO</span></h4>
+            <span class="alert-meta">${a.data_hora}</span>
+          </div>
+          <div class="alert-meta">Nível crítico: ${a.nivel_critico}m | ${a.localizacao}</div>
+        </div>`).join('');
+    } catch(e) { list.innerHTML = '<p class="loading">Erro ao carregar.</p>'; }
+  }
+
+  async function alterarAlerta() {
+    const id = document.getElementById('aEstacao').value;
+    const nivel = document.getElementById('aNivelCritico').value;
+    if (!id || !nivel) { showToast('Preencha todos os campos.', true); return; }
+    const fd = new FormData(); fd.append('id_estacao', id); fd.append('nivel_critico', nivel);
+    const res = await fetch(`${API}/api/private/tecnico/alterar_alerta.php`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+    const data = await res.json();
+    if (data.status === 'ok') { showToast('Nível crítico atualizado!'); loadAlertasAtivos(); }
+    else showToast(data.mensagem, true);
+  }
+
+  // OBSERVAÇÕES
+  async function registarObservacao() {
+    const id = document.getElementById('oEstacao').value;
+    const texto = document.getElementById('oTexto').value.trim();
+    if (!id || !texto) { showToast('Preencha todos os campos.', true); return; }
+    const fd = new FormData(); fd.append('id_estacao', id); fd.append('observacao', texto);
+    const res = await fetch(`${API}/api/private/tecnico/registar_observacao.php`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+    const data = await res.json();
+    if (data.status === 'ok') { showToast('Observação registada!'); document.getElementById('oTexto').value = ''; loadObservacoes(); }
+    else showToast(data.mensagem, true);
+  }
+
+  async function loadObservacoes() {
+    const id = document.getElementById('oFiltroEstacao').value;
+    const list = document.getElementById('obsList');
+    if (!id) { list.innerHTML = '<p class="loading">Selecione uma estação.</p>'; return; }
+    list.innerHTML = '<p class="loading">A carregar...</p>';
+    try {
+      const res = await fetch(`${API}/api/private/tecnico/listar_observacoes.php?id_estacao=${id}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const data = await res.json();
+      if (!data.data || data.data.length === 0) { list.innerHTML = '<p class="loading">Sem observações.</p>'; return; }
+      list.innerHTML = data.data.map(o => `
+        <div class="obs-item">
+          <div class="obs-header">
+            <span class="obs-tecnico">${o.tecnico}</span>
+            <span class="obs-data">${o.data_registo}</span>
+          </div>
+          <div class="obs-texto">${o.observacao}</div>
+        </div>`).join('');
+    } catch(e) { list.innerHTML = '<p class="loading">Erro ao carregar.</p>'; }
+  }
+
+  // HISTÓRICO
+  async function loadHistorico() {
+    const id = document.getElementById('hEstacao').value;
+    const dias = document.getElementById('hDias').value;
+    const result = document.getElementById('historicoResult');
+    if (!id) { showToast('Selecione uma estação.', true); return; }
+    result.innerHTML = '<p class="loading">A carregar...</p>';
+    try {
+      const res = await fetch(`${API}/api/private/tecnico/historico_periodo.php?id_estacao=${id}&dias=${dias}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const data = await res.json();
+      if (!data.data || data.data.length === 0) { result.innerHTML = '<p class="loading">Sem dados para este período.</p>'; return; }
+      const labels = data.data.map(d => d.timestamp.replace('T',' ').substring(0,16));
+      const valores = data.data.map(d => d.nivel_agua);
+      result.innerHTML = `<div class="chart-box"><h3>Nível da água — últimos ${dias} dia(s) (${data.total_registos} registos)</h3><canvas id="histChart" height="100"></canvas></div>`;
+      new Chart(document.getElementById('histChart'), {
+        type: 'line',
+        data: { labels, datasets: [{ data: valores, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.15)', tension: 0.4, fill: true, pointRadius: 2 }] },
+        options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.55)', maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.06)' } }, y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } } } }
+      });
+    } catch(e) { result.innerHTML = '<p class="loading">Erro ao carregar.</p>'; }
+  }
+
+  // EMAILS
+  async function loadEmails() {
+    const list = document.getElementById('emailsList');
+    try {
+      const res = await fetch(`${API}/api/private/tecnico/listar_emails.php`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+      const data = await res.json();
+      if (!data.emails || data.emails.length === 0) { list.innerHTML = '<p class="loading">Nenhum email enviado.</p>'; return; }
+      list.innerHTML = data.emails.map(e => `
+        <div class="email-item">
+          <div class="email-header">
+            <span class="email-para">${e.para}</span>
+            <span class="email-data">${e.data}</span>
+          </div>
+          <div class="email-assunto">${e.assunto}</div>
+          <div class="email-msg">${e.mensagem}</div>
+        </div>`).join('');
+    } catch(e) { list.innerHTML = '<p class="loading">Erro ao carregar.</p>'; }
+  }
+
+  // Init
+  loadEstacoes();
+</script>
+</body>
+</html>
