@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Admin — Águas Alerta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(59,130,246,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 20%, rgba(96,165,250,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(60px); opacity: 0.18; pointer-events: none; animation: float 8s ease-in-out infinite; }
+    .orb-1 { width:400px; height:400px; background:#3b82f6; top:-100px; left:-80px; animation-delay:0s; }
+    .orb-2 { width:300px; height:300px; background:#60a5fa; bottom:-80px; right:-60px; animation-delay:-3s; }
+    .orb-3 { width:200px; height:200px; background:#93c5fd; top:50%; left:60%; animation-delay:-5s; }
+
+    @keyframes float { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-30px) scale(1.05);} }
+
+    .login-card {
+      position: relative;
+      width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 44px 40px;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: cardIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(28px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+
+    .back-link {
+      position: absolute; top: -48px; left: 0;
+      color: rgba(255,255,255,0.6); text-decoration: none;
+      font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .back-link:hover { color: white; }
+
+    .card-header { text-align: center; margin-bottom: 36px; }
+    .shield-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; color: #60a5fa;
+    }
+    .card-header h1 { font-family:'Montserrat',sans-serif; font-size:22px; font-weight:700; color:white; margin-bottom:6px; }
+    .card-header p  { color:rgba(255,255,255,0.5); font-size:14px; }
+
+    .field { margin-bottom: 20px; }
+    .field label { display:block; font-size:13px; font-weight:700; color:rgba(255,255,255,0.65); margin-bottom:8px; letter-spacing:0.04em; text-transform:uppercase; }
+
+    .input-wrap { position: relative; }
+    .input-wrap .icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.35); pointer-events:none; display:flex; }
+    .input-wrap input {
+      width:100%; padding:13px 14px 13px 42px;
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px; color:white;
+      font-family:'Roboto',sans-serif; font-size:15px; outline:none;
+      transition:border-color 0.2s, background 0.2s;
+    }
+    .input-wrap input::placeholder { color:rgba(255,255,255,0.28); }
+    .input-wrap input:focus { border-color:rgba(59,130,246,0.7); background:rgba(59,130,246,0.08); }
+    .toggle-pw {
+      position:absolute; right:14px; top:50%; transform:translateY(-50%);
+      background:none; border:none; color:rgba(255,255,255,0.35);
+      cursor:pointer; display:flex; align-items:center; padding:0; transition:color 0.2s;
+    }
+    .toggle-pw:hover { color:rgba(255,255,255,0.7); }
+
+    .error-msg {
+      display:none; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35);
+      border-radius:8px; padding:10px 14px; font-size:13px; color:#fca5a5;
+      margin-bottom:20px; align-items:center; gap:8px;
+    }
+    .error-msg.visible { display:flex; }
+
+    .btn-login {
+      width:100%; padding:14px; background:#2563eb; border:none; border-radius:10px;
+      color:white; font-family:'Montserrat',sans-serif; font-size:15px; font-weight:700;
+      cursor:pointer; transition:background 0.2s, transform 0.12s;
+      display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px;
+    }
+    .btn-login:hover { background:#1d4ed8; }
+    .btn-login:active { transform:scale(0.98); }
+    .btn-login:disabled { opacity:0.6; cursor:not-allowed; }
+
+    .spinner { display:none; width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    .card-footer { text-align:center; margin-top:28px; font-size:12px; color:rgba(255,255,255,0.3); }
+
+    .success-overlay {
+      display:none; position:absolute; inset:0;
+      background:rgba(15,31,110,0.7); backdrop-filter:blur(6px);
+      border-radius:20px; align-items:center; justify-content:center;
+      flex-direction:column; gap:16px;
+    }
+    .success-overlay.visible { display:flex; }
+    .success-check {
+      width:64px; height:64px; border-radius:50%;
+      background:rgba(34,197,94,0.2); border:1px solid rgba(34,197,94,0.4);
+      display:flex; align-items:center; justify-content:center; color:#4ade80;
+    }
+    .success-overlay p { color:white; font-family:'Montserrat',sans-serif; font-weight:700; font-size:16px; }
+  </style>
+</head>
+
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div style="position:relative;">
+    <a href="../index.html" class="back-link">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+      Voltar ao início
+    </a>
+
+    <div class="login-card">
+      <div class="card-header">
+       <div class="shield-icon" style="background:none; border:none; width:90px; height:90px;">
+  <img src="../assets/images/logo.png" alt="Águas Alerta" style="width:90px;height:90px;object-fit:contain;">
+</div>
+        <h1>Área de Administração</h1>
+        <p>Acesso restrito a administradores</p>
+      </div>
+
+      <div class="error-msg" id="errorMsg">
+        <i data-lucide="circle-alert" style="width:16px;height:16px;flex-shrink:0;"></i>
+        <span id="errorText">Credenciais inválidas. Tente novamente.</span>
+      </div>
+
+      <div class="field">
+        <label>Utilizador</label>
+        <div class="input-wrap">
+          <span class="icon"><i data-lucide="user" style="width:17px;height:17px;"></i></span>
+          <input type="text" id="username" placeholder="nome de utilizador" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Palavra-passe</label>
+        <div class="input-wrap">
+          <span class="icon"><i data-lucide="lock" style="width:17px;height:17px;"></i></span>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="toggle-pw" id="togglePw" type="button">
+            <i data-lucide="eye" style="width:17px;height:17px;" id="eyeIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Entrar</span>
+        <i data-lucide="arrow-right" style="width:17px;height:17px;" id="btnArrow"></i>
+      </button>
+
+      <p class="card-footer">Sistema de Monitorização Hidrológica &middot; v1.0</p>
+
+      <div class="success-overlay" id="successOverlay">
+        <div class="success-check">
+          <i data-lucide="check" style="width:32px;height:32px;"></i>
+        </div>
+        <p>Acesso autorizado!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    let pwVisible = false;
+    document.getElementById('togglePw').addEventListener('click', () => {
+      pwVisible = !pwVisible;
+      document.getElementById('password').type = pwVisible ? 'text' : 'password';
+      document.getElementById('eyeIcon').setAttribute('data-lucide', pwVisible ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    });
+
+    document.getElementById('username').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
+    document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+
+    function handleLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('loginBtn');
+      const spinner  = document.getElementById('spinner');
+      const btnText  = document.getElementById('btnText');
+      const btnArrow = document.getElementById('btnArrow');
+      const errorMsg = document.getElementById('errorMsg');
+      const errorText= document.getElementById('errorText');
+
+      errorMsg.classList.remove('visible');
+
+      if (!username || !password) {
+        errorText.textContent = 'Preencha todos os campos.';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'A verificar...';
+      btnArrow.style.display = 'none';
+
+      setTimeout(() => {
+        // Credenciais demo — substitui pela tua autenticação real
+        if (username === 'admin' && password === 'admin123') {
+          sessionStorage.setItem('adminAuth', 'true');
+          spinner.style.display = 'none';
+          document.getElementById('successOverlay').classList.add('visible');
+          lucide.createIcons();
+          setTimeout(() => { window.location.href = 'admin.html'; }, 1200);
+        } else {
+          btn.disabled = false;
+          spinner.style.display = 'none';
+          btnText.textContent = 'Entrar';
+          btnArrow.style.display = '';
+          errorText.textContent = 'Credenciais inválidas. Tente novamente.';
+          errorMsg.classList.add('visible');
+          const card = document.querySelector('.login-card');
+          card.style.transition = 'transform 0.08s ease';
+          ['-8px','8px','-5px','5px','0'].forEach((v,i) => {
+            setTimeout(() => { card.style.transform = `translateX(${v})`; }, i * 80);
+          });
+        }
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>
