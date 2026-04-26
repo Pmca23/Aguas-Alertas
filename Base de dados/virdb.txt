@@ -109,7 +109,7 @@ CREATE TABLE observacoes (
 );
 
 -- ============================================================
--- STORED PROCEDURE (SEM CAUDAL)
+-- STORED PROCEDURE
 -- ============================================================
 DELIMITER $$
 
