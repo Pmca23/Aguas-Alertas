@@ -1,5 +1,5 @@
 -- ============================================================
--- ÁGUAS ALERTA · V.I.R. (SEM CAUDAL)
+-- ÁGUAS ALERTA · V.I.R.
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS vir_db
@@ -92,6 +92,23 @@ CREATE TABLE utilizadores (
 );
 
 -- ============================================================
+-- OBSERVACOES
+-- ============================================================
+CREATE TABLE observacoes (
+    id_observacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    id_utilizador INT NOT NULL,
+    observacao TEXT NOT NULL,
+    data_registo DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    FOREIGN KEY (id_utilizador) REFERENCES utilizadores(id_utilizador)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
 -- STORED PROCEDURE (SEM CAUDAL)
 -- ============================================================
 DELIMITER $$
@@ -152,7 +169,8 @@ SELECT
     l.em_alerta
 FROM estacoes e
 JOIN leituras l ON l.id_leitura = (
-    SELECT id_leitura FROM leituras
+    SELECT id_leitura
+    FROM leituras
     WHERE id_estacao = e.id_estacao
     ORDER BY timestamp DESC
     LIMIT 1
