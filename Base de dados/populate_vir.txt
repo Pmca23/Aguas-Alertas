@@ -50,10 +50,11 @@ VALUES
 -- ALERTAS
 -- ============================================================
 INSERT INTO alertas
-(id_estacao,nivel_critico,estado)
+(id_estacao, nivel_critico, tipo, estado)
 VALUES
-(1,6.0,'ativo'),
-(2,5.2,'resolvido');
+(1, 6.0, 'critico', 'ativo'),
+(2, 5.2, 'aviso', 'resolvido'),
+(3, 4.3, 'informacao', 'ativo');
 
 -- ============================================================
 -- NOTIFICACOES
