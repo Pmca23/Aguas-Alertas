@@ -1,292 +1,223 @@
-# V.I.R. REST API Documentation
+# V.I.R. API Documentation
+
+Sistema backend para monitorização inteligente de rios, alertas automáticos e gestão operacional.
+
+---
 
 ## Autenticação
 
-A API utiliza autenticação baseada em JWT (JSON Web Tokens).
+A API utiliza autenticação baseada em JWT.
 
 Para aceder a endpoints protegidos:
 
-```plaintext
-Authorization: Bearer
-Base URL
-http://localhost/vir/backend/
-Endpoints
-Auth
-Login
+    Authorization: Bearer {seu-token-jwt}
+
+---
+
+## Base URL
+
+    http://localhost/vir/backend/
+
+---
+
+# Auth
+
+## Login
 
 Autentica um utilizador existente.
 
-POST /auth/login.php
+**Endpoint**
 
-Request Body
-{
-  "email": "admin@vir.pt",
-  "password": "admin123"
-}
+    POST /auth/login.php
+
+**Request**
+
+    {
+      "email": "admin@vir.pt",
+      "password": "admin123"
+    }
 
 ou
 
-{
-  "email": "tecnico@vir.pt",
-  "password": "tecnico123"
-}
-Response: 200 OK
-{
-  "status": "ok",
-  "token": "eyJhbGciOi...",
-  "user": {
-    "id": 1,
-    "nome": "Admin",
-    "role": "admin"
-  }
-}
-Logout
+    {
+      "email": "tecnico@vir.pt",
+      "password": "tecnico123"
+    }
 
-Termina sessão/token atual.
+**Response**
 
-POST /auth/logout.php
+    {
+      "status": "ok",
+      "token": "jwt_token",
+      "user": {
+        "id": 1,
+        "nome": "Administrador",
+        "role": "admin"
+      }
+    }
 
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Logout efetuado"
-}
-Técnico
+---
 
-Necessário login técnico + Bearer Token.
+## Logout
 
-Dashboard Técnico
+Termina sessão atual.
 
-Retorna resumo geral para painel técnico.
+**Endpoint**
 
-GET /api/private/tecnico/dashboard_tecnico.php
+    POST /auth/logout.php
 
-Response: 200 OK
-{
-  "status": "ok",
-  "data": {
-    "nivel_atual": 4.2,
-    "media": 3.8,
-    "maximo": 6.1,
-    "alertas": 1
-  }
-}
-Histórico por Período
+**Response**
 
-Retorna leituras históricas.
+    {
+      "status": "ok",
+      "mensagem": "Logout efetuado"
+    }
 
-GET /api/private/tecnico/historico_periodo.php?id_estacao=1&dias=7
+---
 
-Parameters
-id_estacao (required)
-dias (optional)
-Response: 200 OK
-{
-  "status": "ok",
-  "total_registos": 25,
-  "data": []
-}
-Estatísticas do Rio
+# Técnico
 
-Retorna estatísticas da estação.
+Requer utilizador com role técnico.
 
-GET /api/private/tecnico/estatisticas_rio.php?id_estacao=1
+## Dashboard Técnico
 
-Response: 200 OK
-{
-  "status": "ok",
-  "data": {
-    "media": 3.4,
-    "maximo": 6.2,
-    "minimo": 1.8,
-    "total": 40
-  }
-}
-Análise do Rio
+    GET /api/private/tecnico/dashboard_tecnico.php
 
-Retorna tendência atual.
+## Histórico por Período
 
-GET /api/private/tecnico/analise_rio.php?id_estacao=1
+    GET /api/private/tecnico/historico_periodo.php?id_estacao=1&dias=7
 
-Response: 200 OK
-{
-  "status": "ok",
-  "analise": "Nível a subir"
-}
-Alterar Alerta
+## Estatísticas do Rio
 
-Atualiza nível crítico ativo.
+    GET /api/private/tecnico/estatisticas_rio.php?id_estacao=1
 
-POST /api/private/tecnico/alterar_alerta.php
+## Análise do Rio
 
-Request Body
-{
-  "id_estacao": 1,
-  "nivel_critico": 6.5
-}
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Nível de alerta atualizado"
-}
-Registar Observação
+    GET /api/private/tecnico/analise_rio.php?id_estacao=1
 
-Adiciona observação técnica.
+---
 
-POST /api/private/tecnico/registar_observacao.php
+## Criar Alerta Manual
 
-Request Body
-{
-  "id_estacao": 1,
-  "observacao": "Subida rápida após chuva intensa"
-}
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Observação registada"
-}
-Listar Observações
+    POST /api/private/tecnico/criar_alerta.php
 
-Lista observações de uma estação.
+**Request**
 
-GET /api/private/tecnico/listar_observacoes.php?id_estacao=1
+    {
+      "id_estacao": 1,
+      "nivel_critico": 6.5,
+      "tipo": "critico"
+    }
 
-Response: 200 OK
-{
-  "status": "ok",
-  "total": 3,
-  "data": []
-}
-Listar Emails
+Tipos:
 
-Lista notificações simuladas enviadas.
+- informacao
+- aviso
+- critico
 
-GET /api/private/tecnico/listar_emails.php
+---
 
-Response: 200 OK
-{
-  "status": "ok",
-  "total": 2,
-  "emails": []
-}
-Admin
+## Resolver Alerta
 
-Necessário login admin + Bearer Token.
+    POST /api/private/tecnico/resolver_alerta.php
 
-Dashboard Admin
+**Request**
 
-Resumo geral do sistema.
+    {
+      "id_alerta": 1
+    }
 
-GET /api/private/admin/dashboard_admin.php
+---
 
-Response: 200 OK
-{
-  "status": "ok",
-  "data": {
-    "total_estacoes": 5,
-    "alertas_ativos": 1,
-    "media_nivel_agua": 3.2,
-    "total_utilizadores": 2
-  }
-}
-Listar Utilizadores
+## Listar Alertas
 
-Lista todos os utilizadores.
+    GET /api/private/tecnico/listar_alertas.php
 
-GET /api/private/admin/listar_utilizadores.php
+---
 
-Response: 200 OK
-{
-  "status": "ok",
-  "total_utilizadores": 2,
-  "data": []
-}
-Criar Técnico
+## Alterar Alerta
 
-Cria novo utilizador técnico.
+    POST /api/private/tecnico/alterar_alerta.php
 
-POST /api/private/admin/criar_tecnico.php
+---
 
-Request Body
-{
-  "nome": "Novo Técnico",
-  "email": "novo@vir.pt",
-  "password": "123456"
-}
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Técnico criado com sucesso"
-}
-Eliminar Utilizador
+## Registar Observação
 
-Remove técnico existente.
+    POST /api/private/tecnico/registar_observacao.php
 
-POST /api/private/admin/eliminar_utilizador.php
+---
 
-Request Body
-{
-  "id_utilizador": 5
-}
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Técnico eliminado"
-}
-Estatísticas
+## Listar Observações
 
-Retorna métricas globais.
+    GET /api/private/tecnico/listar_observacoes.php?id_estacao=1
 
-GET /api/private/admin/estatisticas.php
+---
 
-Response: 200 OK
-{
-  "status": "ok",
-  "data": {}
-}
-Leituras
-Inserir Leitura
+## Listar Emails
 
-Regista nova leitura manualmente.
+    GET /api/private/tecnico/listar_emails.php
 
-POST /api/private/inserir_leitura.php
+---
 
-Request Body
-{
-  "id_estacao": 1,
-  "nivel": 7.5,
-  "temperatura": 14
-}
-Funções Automáticas
-Regista leitura
-Verifica limite de segurança
-Cria alerta
-Envia emails para localidades afetadas
-Regista notificações
-Response: 200 OK
-{
-  "status": "ok",
-  "mensagem": "Leitura registada",
-  "emails_enviados": 2
-}
-API Pública
+# Admin
 
-Sem autenticação.
+Requer utilizador com role admin.
 
-Última Leitura
+## Dashboard Admin
 
-GET /api/public/ultima_leitura.php
+    GET /api/private/admin/dashboard_admin.php
 
-Alertas Ativos
+## Listar Utilizadores
 
-GET /api/public/alertas_ativos.php
+    GET /api/private/admin/listar_utilizadores.php
 
-Histórico Público
+## Criar Técnico
 
-GET /api/public/historico.php
+    POST /api/private/admin/criar_tecnico.php
 
-Url base da api é http://localhost/Aguas-Alertas/Backend/backend/api/
-Email: admin@aguasalerta.pt
-Password: admin123
+## Eliminar Utilizador
 
-http://localhost/Aguas-Alertas/Frontend/index.html
+    POST /api/private/admin/eliminar_utilizador.php
+
+## Estatísticas
+
+    GET /api/private/admin/estatisticas.php
+
+---
+
+# Leituras
+
+## Inserir Leitura
+
+    POST /api/private/inserir_leitura.php
+
+**Request**
+
+    {
+      "id_estacao": 1,
+      "nivel": 7.5,
+      "temperatura": 14
+    }
+
+Funções automáticas:
+
+- Guarda leitura
+- Verifica limite de segurança
+- Cria alerta automático
+- Envia emails
+- Regista notificações
+
+---
+
+# Segurança
+
+- Password Hashing
+- JWT Authentication
+- Bearer Token
+- Proteção por Roles
+
+---
+
+# Estado Atual
+
+Backend funcional e pronto para frontend.
