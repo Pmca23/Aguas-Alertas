@@ -4,7 +4,7 @@
 
 A API utiliza autenticação baseada em JWT (JSON Web Tokens).
 
-Para aceder a endpoints protegidos, incluir no header:
+Para aceder a endpoints protegidos:
 
 ```plaintext
 Authorization: Bearer
