@@ -1,5 +1,5 @@
 -- ============================================================
--- POPULATE (SEM CAUDAL)
+-- POPULATE
 -- ============================================================
 
 USE vir_db;
@@ -28,7 +28,7 @@ VALUES
 (3,'Proteção Civil Coimbra','coimbra@pc.pt','239000000',1);
 
 -- ============================================================
--- LEITURAS (SIMULAÇÃO REALISTA)
+-- LEITURAS
 -- ============================================================
 INSERT INTO leituras
 (id_estacao, timestamp, nivel_agua, temperatura, em_alerta)
@@ -65,3 +65,15 @@ VALUES
 (1,1,'sms',TRUE),
 (1,1,'sirene',TRUE),
 (2,3,'email',TRUE);
+
+-- ============================================================
+-- OBSERVACOES
+-- ============================================================
+INSERT INTO observacoes
+(id_estacao,id_utilizador,observacao,data_registo)
+VALUES
+(1,2,'Subida rápida do nível da água após precipitação intensa.', NOW() - INTERVAL 2 HOUR),
+(1,2,'Zona ribeirinha monitorizada. Situação estabilizada.', NOW() - INTERVAL 1 HOUR),
+(2,2,'Sem risco imediato. Valores dentro do normal.', NOW() - INTERVAL 45 MINUTE),
+(3,2,'Pequena variação registada durante a madrugada.', NOW() - INTERVAL 30 MINUTE),
+(1,2,'Necessário reforçar vigilância nas próximas horas.', NOW() - INTERVAL 10 MINUTE);
