@@ -263,3 +263,68 @@ Foram também considerados:
 - Organização de ficheiros
 - Separação de responsabilidades (HTML, CSS e JS)
 - Boas práticas de desenvolvimento
+
+# 6º Relatório
+
+## 1. Evolução do Projeto
+
+### 1.1 Continuação do Desenvolvimento Frontend
+
+Durante esta fase do projeto, dei continuidade ao desenvolvimento do frontend da aplicação Águas Alerta.
+
+Concentrei-me em melhorar a interface e em tornar a aplicação mais completa e funcional para o utilizador.
+
+---
+
+### 1.2 Desenvolvimento das Dashboards
+
+Desenvolvi as dashboards da aplicação, de forma a permitir aos utilizadores acompanhar os dados dos rios em tempo real.
+
+Nas dashboards implementei:
+
+- Visualização dos níveis da água  
+- Sistema de alertas (normal, atenção, alerta)  
+- Organização clara da informação  
+
+O objetivo foi facilitar a leitura dos dados e tornar a navegação simples e intuitiva.
+
+---
+
+### 1.3 Ligação ao Backend e à Base de Dados
+
+Nesta fase, fiz a ligação do frontend ao backend e à base de dados.
+
+Com isto, a aplicação passou a:
+
+- Ir buscar dados reais  
+- Atualizar automaticamente a informação  
+- Funcionar de forma dinâmica  
+
+Esta foi uma das partes mais importantes, pois deixou de ser apenas visual e passou a ser funcional.
+
+---
+
+### 1.4 Implementação do Login
+
+Adicionei um sistema de login na página inicial.
+
+Este permite:
+
+- Acesso ao sistema por parte dos utilizadores  
+- Separação entre áreas públicas e administrativas  
+- Maior controlo sobre o acesso à aplicação  
+
+---
+
+### 1.5 Melhorias Visuais
+
+Também trabalhei bastante na parte visual da aplicação.
+
+Fiz melhorias como:
+
+- Adição de logótipos  
+- Uso de ícones  
+- Melhor organização dos elementos  
+- Dashboards mais modernas e apelativas  
+
+O objetivo foi deixar a aplicação mais bonita e profissional.
