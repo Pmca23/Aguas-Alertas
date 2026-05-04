@@ -210,3 +210,56 @@ Os mockups incluem:
 - Login Admin
 - Página Admin 
 
+# 5º Relatório
+
+## 1. Evolução do Projeto
+
+### 1.1 Início do Desenvolvimento Frontend
+
+Durante esta fase do projeto, foi iniciado o desenvolvimento do frontend da aplicação Águas Alerta.
+
+Esta etapa marca a transição do planeamento visual (mockups) para a implementação real da interface.
+
+O desenvolvimento foi realizado utilizando:
+
+- HTML5
+- CSS3
+- JavaScript
+- Visual Studio Code
+
+---
+
+### 1.2 Desenvolvimento da Página Inicial
+
+Foi criada a página inicial (index.html) da plataforma.
+
+Esta página representa o ponto de entrada do utilizador e inclui:
+
+- Estrutura base do layout
+- Organização dos principais elementos visuais
+- Preparação para integração futura com dados reais
+
+Elementos já implementados:
+
+- Cabeçalho (header)
+- Área principal (dashboard inicial)
+- Secções organizadas para futura inserção de dados
+- Estrutura preparada para responsividade
+
+---
+
+### 1.3 Integração de Tecnologias Web
+
+Durante o desenvolvimento, foi feita a ligação entre:
+
+- HTML (estrutura)
+- CSS (estilização)
+- JavaScript (interatividade)
+
+Isto permitiu criar uma base funcional e dinâmica para o sistema.
+
+Foram também considerados:
+
+- Organização de ficheiros
+- Separação de responsabilidades (HTML, CSS e JS)
+- Boas práticas de desenvolvimento
