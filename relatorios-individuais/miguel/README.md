@@ -187,3 +187,45 @@ Foi feito um diagrama de casos de uso para documentação do projeto, contemplan
 - Ator Técnico: registar observações, alterar nível crítico, ver histórico, gerir alertas
 - Ator Administrador: gerir utilizadores, criar técnicos, consultar estatísticas globais
 - Fronteira do sistema claramente delimitada com identificação de todas as interações
+
+---
+
+## Relatório 6
+
+**Relatório Individual – Miguel Croca**
+
+### Finalização do Frontend
+
+Nesta fase o trabalho centrou-se na conclusão de todas as páginas do frontend, garantindo que o produto final corresponde integralmente aos wireframes e mockups produzidos nas fases anteriores. Foram revistas todas as interfaces para assegurar consistência visual, correta integração com a API e comportamento esperado em todos os fluxos de utilização.
+
+### Testes e Correção de Erros
+
+Foi realizada uma fase de testes funcionais cobrindo todos os percursos possíveis na plataforma:
+
+- Testes ao fluxo de autenticação: login com perfil admin, login com perfil técnico e tentativas com credenciais inválidas
+- Verificação do redirecionamento automático por role após autenticação
+- Testes ao guard de autenticação nas páginas privadas, confirmando o bloqueio de acesso direto por URL sem sessão válida
+- Validação dos dados apresentados no dashboard público, confirmando que os valores correspondem às leituras reais da base de dados
+- Testes às barras de nível com diferentes valores para verificar a transição correta entre as cores verde, laranja e vermelho
+- Verificação do auto-refresh a cada 30 segundos no dashboard público
+- Testes às funcionalidades do painel de administrador: criação e eliminação de técnicos, consulta de estatísticas
+- Testes às funcionalidades do painel técnico: alteração de nível crítico, registo de observações, gestão de alertas
+- Identificação e correção de erros de integração residuais, incluindo chamadas à API com endpoints incorretos e problemas de autenticação JWT
+
+### Wireframes de Alta Fidelidade do Produto Final
+
+Após a conclusão do desenvolvimento e correção dos erros identificados, foram produzidos wireframes de alta fidelidade do produto final, refletindo o estado real da plataforma e não apenas o planeamento inicial:
+
+- **Wireframe final da Página Inicial** — com mapa interativo integrado e navegação para o dashboard
+- **Wireframe final do Login** — com logótipo da marca, animações de feedback e fluxo de autenticação completo
+- **Wireframe final do Dashboard Público** — com barras de nível dinâmicas, seletor de estação, gráfico histórico e painel de alertas
+- **Wireframe final do Painel de Administrador** — com listagem real de utilizadores, formulário de criação de técnicos e estatísticas globais
+- **Wireframe final do Painel Técnico** — com gestão de alertas, registo de observações, histórico por período e consulta de emails enviados
+
+### Reflexão Crítica
+
+A fase de testes revelou-se fundamental para garantir a qualidade do produto final. Vários comportamentos inesperados foram identificados e corrigidos, resultando numa plataforma mais robusta e fiável. A produção dos wireframes finais permitiu documentar o estado real da aplicação e assegurar que o produto entregue corresponde ao que foi planeado e comunicado à equipa.
+
+### Próximos Passos e Prioridades
+
+Preparar a apresentação final do projeto e documentar as funcionalidades implementadas para entrega.
