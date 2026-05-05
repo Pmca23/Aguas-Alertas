@@ -38,6 +38,88 @@ Para concluir, considero que o trabalho está a evoluir de forma positiva. Ainda
 
 **Relatório Individual – Miguel Croca**
 
+### Desenvolvimento de Ideias e Conceito
+
+Nesta fase o trabalho centrou-se na consolidação das ideias para o projeto, partindo dos resultados da investigação inicial. Foi feita uma análise aprofundada dos requisitos funcionais da plataforma, identificando os principais fluxos de utilização para cada perfil de utilizador — público, técnico e administrador.
+
+Foram exploradas diferentes abordagens para a arquitetura de informação do site, debatendo a melhor forma de apresentar dados em tempo real de forma clara e acessível a qualquer utilizador, independentemente do seu nível técnico.
+
+### Investigação e UX Research
+
+- Desenvolvimento de personas representativas dos diferentes perfis de utilizadores da plataforma
+- Elaboração da jornada do utilizador (user journey) para cada perfil, identificando pontos de contacto, ações, emoções e oportunidades de melhoria
+- Pesquisa de utilizadores para compreender necessidades, comportamentos e expectativas do público-alvo
+- Ligação entre insights recolhidos na pesquisa, identificando padrões de comportamento e prioridades de design
+
+### Definição da Identidade Visual
+
+Foi estabelecido o sistema de design da plataforma, definindo os elementos visuais que seriam usados de forma consistente em todas as páginas:
+
+- Paleta de cores assente num gradiente azul profundo, complementado pelo sistema semafórico de risco: verde (seguro), laranja (aviso) e vermelho (crítico)
+- Tipografia: Montserrat para títulos e Roboto para texto de interface
+- Estilo glassmorphism para elementos de autenticação e cards
+- Definição dos componentes reutilizáveis: cards de dados, barras de nível, banners de alerta e badges de estado
+
+### Reflexão Crítica
+
+A fase de desenvolvimento de ideias e investigação foi essencial para garantir que as decisões de design tomadas nas fases seguintes fossem fundamentadas em necessidades reais dos utilizadores e não em suposições. O trabalho produzido nesta fase serviu de base para toda a prototipagem e desenvolvimento subsequentes.
+
+### Próximos Passos e Prioridades
+
+Avançar para a produção de wireframes e mockups de alta fidelidade com base nas decisões tomadas nesta fase.
+
+---
+
+## Relatório 3
+
+**Relatório Individual – Miguel Croca**
+
+### Produção de Wireframes e Mockups
+
+Nesta fase foram produzidos wireframes e mockups de alta fidelidade para todas as páginas da plataforma Águas Alerta, servindo como guia visual para o desenvolvimento frontend.
+
+### Wireframes Produzidos
+
+Foram criados wireframes de alta fidelidade em HTML para as cinco páginas da plataforma, reproduzindo fielmente o design system definido na fase anterior:
+
+- **Wireframe da Página Inicial** — estrutura com cabeçalho, logótipo, barra de pesquisa por zona e mapa interativo
+- **Wireframe do Login de Administrador** — card centralizado com glassmorphism, campos de autenticação e logótipo da marca
+- **Wireframe do Dashboard Público** — barras de nível com sistema de cores de risco, seletor de estação, gráfico histórico e separador de alertas
+- **Wireframe do Painel de Administrador** — interface com tabs para gestão de utilizadores e estatísticas globais
+- **Wireframe do Painel Técnico** — interface com tabs para gestão de alertas, registo de observações e histórico
+
+### Mockups das Interfaces
+
+Os mockups foram desenvolvidos com foco na clareza e na rapidez de leitura, respondendo diretamente aos insights recolhidos na fase de investigação:
+
+- Página inicial com barra de pesquisa por zona para acesso imediato à informação relevante
+- Dashboard com sistema de cores verde/laranja/vermelho para comunicar níveis de risco de forma intuitiva
+- Painéis de administração e técnico com interfaces distintas e adaptadas às responsabilidades de cada perfil
+- Consistência visual garantida em todos os ecrãs, com alinhamento com as necessidades dos utilizadores identificadas nas personas
+
+### Diagrama de Casos de Uso
+
+Foi produzido um diagrama de casos de uso para documentação técnica do projeto, contemplando:
+
+- Ator Utilizador Público: consultar dashboard, ver níveis dos rios, ver alertas ativos, pesquisar por zona
+- Ator Técnico: registar observações, alterar nível crítico, ver histórico, gerir alertas
+- Ator Administrador: gerir utilizadores, criar técnicos, consultar estatísticas globais
+- Fronteira do sistema claramente delimitada com identificação de todas as interações
+
+### Reflexão Crítica
+
+A produção de wireframes e mockups antes do início do desenvolvimento permitiu reduzir o número de iterações necessárias durante a implementação e assegurou que toda a equipa partilhava a mesma visão sobre o produto final.
+
+### Próximos Passos e Prioridades
+
+Iniciar o desenvolvimento frontend com base nos wireframes produzidos, começando pela página inicial e pelo sistema de login.
+
+---
+
+## Relatório 4
+
+**Relatório Individual – Miguel Croca**
+
 ### Página de Login
 
 Criada de raiz com design consistente com a identidade visual do projeto. Funcionalidades implementadas:
@@ -71,7 +153,7 @@ Página de acesso restrito ao perfil `admin`, com verificação de sessão JWT a
 
 ---
 
-## Relatório 3
+## Relatório 5
 
 **Relatório Individual – Miguel Croca**
 
@@ -105,11 +187,3 @@ Foi feito um diagrama de casos de uso para documentação do projeto, contemplan
 - Ator Técnico: registar observações, alterar nível crítico, ver histórico, gerir alertas
 - Ator Administrador: gerir utilizadores, criar técnicos, consultar estatísticas globais
 - Fronteira do sistema claramente delimitada com identificação de todas as interações
-
- 
-
-Miguel Croca, 20240408 
-
- 
-
- 
