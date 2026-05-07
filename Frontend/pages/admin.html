@@ -163,22 +163,22 @@
   document.getElementById('userNome').textContent = sessionStorage.getItem('userNome') || '—';
   function getToken() { return sessionStorage.getItem('token'); }
 
+  const tabOrder = ['estatisticas', 'utilizadores', 'criar'];
   let tabAtual = 'estatisticas';
-  let tabAnterior = null;
 
   function handleBack(e) {
     e.preventDefault();
-    if (tabAtual === 'estatisticas') {
+    const idx = tabOrder.indexOf(tabAtual);
+    if (idx <= 0) {
       sessionStorage.clear();
       window.location.href = 'login.html';
     } else {
-      const destino = tabAnterior || 'estatisticas';
+      const destino = tabOrder[idx - 1];
       openTab(destino, document.querySelector(`[onclick*="'${destino}'"]`));
     }
   }
 
   function updateBackBtn(tab) {
-    tabAnterior = tabAtual;
     tabAtual = tab;
     document.getElementById('backLabel').textContent = tab === 'estatisticas' ? 'Sair' : 'Voltar';
     lucide.createIcons();
