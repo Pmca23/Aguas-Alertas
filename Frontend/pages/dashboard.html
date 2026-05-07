@@ -184,7 +184,7 @@
 <script>
   lucide.createIcons();
 
-  const API = 'http://localhost/Aguas-Alertas/Backend/backend';
+  const API = 'http://localhost/Aguas-Alertas/backend';
   let waterChart = null;
   let alertasAtivos = [];
 
@@ -196,12 +196,10 @@
     if (name === 'alertas') renderAlertas();
   }
 
-  // Verifica se a estação tem alerta ativo
   function verificarAlertaEstacao(id) {
     return alertasAtivos.some(a => String(a.id_estacao) === String(id));
   }
 
-  // Carregar alertas ativos globalmente
   async function loadAlertasAtivos() {
     try {
       const res = await fetch(`${API}/api/public/alertas_ativos.php`);
@@ -210,13 +208,13 @@
     } catch(e) { alertasAtivos = []; }
   }
 
-  // Carregar estações no select
   async function loadEstacoes() {
     try {
       const res = await fetch(`${API}/api/public/ultima_leitura.php`);
       const data = await res.json();
       const sel = document.getElementById('estacaoSelect');
       sel.innerHTML = '<option value="">— Selecione uma estação —</option>';
+
       if (data.status === 'ok') {
         data.data.forEach(e => {
           const opt = document.createElement('option');
@@ -227,10 +225,22 @@
           opt.dataset.ts    = e.timestamp;
           sel.appendChild(opt);
         });
-        if (data.data.length > 0) {
+
+        // Verificar se veio parâmetro da página principal
+        const params = new URLSearchParams(window.location.search);
+        const estacaoParam = params.get('estacao');
+
+        if (estacaoParam) {
+          const opcoes = Array.from(sel.options);
+          const nomeRio = estacaoParam.split('—')[0].trim();
+          const match = opcoes.find(o => o.textContent.includes(nomeRio));
+          if (match) sel.value = match.value;
+          else if (data.data.length > 0) sel.value = data.data[0].id_estacao;
+        } else if (data.data.length > 0) {
           sel.value = data.data[0].id_estacao;
-          loadEstacao();
         }
+
+        loadEstacao();
       }
     } catch(e) { console.error(e); }
   }
@@ -244,15 +254,12 @@
     const nivel = parseFloat(opt.dataset.nivel) || 0;
     const temp  = parseFloat(opt.dataset.temp)  || 0;
     const ts    = opt.dataset.ts || '—';
-    const limite = 5.0; // valor padrão, ajusta se tiveres o nivel_max_seguranca no endpoint
+    const limite = 5.0;
 
-    // Verificar alerta ativo para esta estação
     const emAlerta = verificarAlertaEstacao(id);
 
-    // Título
     document.getElementById('pageTitle').textContent = 'Monitoramento — ' + opt.textContent;
 
-    // Banner
     const banner = document.getElementById('alertBanner');
     const icon   = document.getElementById('alertIcon');
     if (emAlerta) {
@@ -270,7 +277,6 @@
     }
     lucide.createIcons();
 
-    // Card Nível
     document.getElementById('valNivel').innerHTML = nivel.toFixed(2) + ' <span>m</span>';
     document.getElementById('subNivel').textContent = `Limite: ${limite}m`;
     const maxBarra = limite * 1.2;
@@ -280,64 +286,62 @@
     document.getElementById('barNivel').style.background = corNivel;
     document.getElementById('mwNivel').style.left = ((limite * 0.85 / maxBarra) * 100) + '%';
     document.getElementById('mdNivel').style.left = ((limite / maxBarra) * 100) + '%';
-    document.getElementById('lblNivelOk').textContent      = `Seguro: <${(limite * 0.85).toFixed(1)}m`;
-    document.getElementById('lblNivelWarn').textContent    = `Aviso: ${(limite * 0.85).toFixed(1)}m`;
-    document.getElementById('lblNivelDanger').textContent  = `Crítico: ${limite}m`;
+    document.getElementById('lblNivelOk').textContent     = `Seguro: <${(limite * 0.85).toFixed(1)}m`;
+    document.getElementById('lblNivelWarn').textContent   = `Aviso: ${(limite * 0.85).toFixed(1)}m`;
+    document.getElementById('lblNivelDanger').textContent = `Crítico: ${limite}m`;
 
-    // Card Timestamp
     document.getElementById('valTimestamp').textContent = ts.split(' ')[1]?.substring(0,5) || '—';
 
-    // Card Temperatura
     document.getElementById('valTemp').innerHTML = temp.toFixed(1) + ' <span>°C</span>';
     const pctTemp = Math.min((temp / 40) * 100, 100);
     const corTemp = temp >= 35 ? '#ef4444' : temp >= 28 ? '#f97316' : '#22c55e';
     document.getElementById('barTempFill').style.width      = pctTemp + '%';
     document.getElementById('barTempFill').style.background = corTemp;
 
-    // Gráfico
     loadGrafico(id);
   }
 
   async function loadGrafico(id) {
-  try {
-    const res = await fetch(`${API}/api/public/historico.php`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`${API}/api/public/historico.php`);
+      const data = await res.json();
 
-    let labels = [], valores = [];
+      let labels = [], valores = [];
 
-    if (data.status === 'ok' && data.data && data.data.length > 0) {
-      const filtrado = data.data
-        .filter(d => d.nome === document.getElementById('estacaoSelect').options[document.getElementById('estacaoSelect').selectedIndex].textContent)
-        .reverse();
+      if (data.status === 'ok' && data.data && data.data.length > 0) {
+        const nomeEstacao = document.getElementById('estacaoSelect').options[document.getElementById('estacaoSelect').selectedIndex].textContent;
+        const filtrado = data.data
+          .filter(d => d.nome === nomeEstacao)
+          .reverse();
 
-      labels  = filtrado.map(d => d.timestamp.split(' ')[1]?.substring(0,5) || '');
-      valores = filtrado.map(d => parseFloat(d.nivel_agua));
-    }
-
-    if (waterChart) waterChart.destroy();
-    waterChart = new Chart(document.getElementById('waterChart'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: valores,
-          borderColor: '#60a5fa',
-          backgroundColor: 'rgba(96,165,250,0.15)',
-          tension: 0.4, fill: true,
-          pointBackgroundColor: '#60a5fa',
-          pointRadius: 3
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: 'rgba(255,255,255,0.55)', maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.06)' } },
-          y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
-        }
+        labels  = filtrado.map(d => d.timestamp.split(' ')[1]?.substring(0,5) || '');
+        valores = filtrado.map(d => parseFloat(d.nivel_agua));
       }
-    });
-  } catch(e) { console.error(e); }
-}
+
+      if (waterChart) waterChart.destroy();
+      waterChart = new Chart(document.getElementById('waterChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: valores,
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96,165,250,0.15)',
+            tension: 0.4, fill: true,
+            pointBackgroundColor: '#60a5fa',
+            pointRadius: 3
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: 'rgba(255,255,255,0.55)', maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+            y: { ticks: { color: 'rgba(255,255,255,0.55)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+          }
+        }
+      });
+    } catch(e) { console.error(e); }
+  }
 
   function renderAlertas() {
     const list = document.getElementById('alertList');
@@ -373,7 +377,6 @@
     lucide.createIcons();
   }
 
-  // Init
   async function init() {
     await loadAlertasAtivos();
     await loadEstacoes();
@@ -382,7 +385,6 @@
 
   init();
 
-  // Auto-refresh a cada 30 segundos
   setInterval(async () => {
     await loadAlertasAtivos();
     const id = document.getElementById('estacaoSelect').value;

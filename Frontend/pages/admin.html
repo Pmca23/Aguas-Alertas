@@ -10,7 +10,9 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Roboto', sans-serif; min-height: 100vh; background: radial-gradient(ellipse at 60% 40%, #1a3a9c 0%, #0f1f6e 40%, #080f3d 100%); color: white; padding: 36px 40px; }
     .page { max-width: 1100px; margin: 0 auto; }
-    .back { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; transition: color 0.2s; }
+    .top-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+    .top-nav a.logo-link img { width: 40px; height: 40px; object-fit: contain; display: block; }
+    .back { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; }
     .back:hover { color: white; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; }
     .page-title h1 { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 700; }
@@ -67,10 +69,17 @@
 </head>
 <body>
 <main class="page">
-  <a href="#" class="back" onclick="handleSair(event)">
-    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-    Sair
-  </a>
+
+  <div class="top-nav">
+    <a href="../index.html" class="logo-link">
+      <img src="../assets/images/logosemtexto.png" alt="Águas Alerta">
+    </a>
+    <a href="#" class="back" id="backBtn" onclick="handleBack(event)">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+      <span id="backLabel">Sair</span>
+    </a>
+  </div>
+
   <div class="page-header">
     <div class="page-title">
       <h1>Painel de Administração</h1>
@@ -83,6 +92,7 @@
     </div>
   </div>
   <div class="line"></div>
+
   <div class="tabs">
     <button class="tab active" onclick="openTab('estatisticas', this)">
       <i data-lucide="bar-chart-2" style="width:15px;height:15px;"></i>
@@ -144,7 +154,7 @@
 
 <script>
   lucide.createIcons();
-  const API = 'http://localhost/Aguas-Alertas/Backend/backend';
+  const API = 'http://localhost/Aguas-Alertas/backend';
 
   if (sessionStorage.getItem('adminAuth') !== 'true' || sessionStorage.getItem('userRole') !== 'admin') {
     window.location.href = 'login.html';
@@ -153,13 +163,33 @@
   document.getElementById('userNome').textContent = sessionStorage.getItem('userNome') || '—';
   function getToken() { return sessionStorage.getItem('token'); }
 
-  function handleSair(e) { e.preventDefault(); sessionStorage.clear(); window.location.href = 'login.html'; }
+  let tabAtual = 'estatisticas';
+  let tabAnterior = null;
+
+  function handleBack(e) {
+    e.preventDefault();
+    if (tabAtual === 'estatisticas') {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    } else {
+      const destino = tabAnterior || 'estatisticas';
+      openTab(destino, document.querySelector(`[onclick*="'${destino}'"]`));
+    }
+  }
+
+  function updateBackBtn(tab) {
+    tabAnterior = tabAtual;
+    tabAtual = tab;
+    document.getElementById('backLabel').textContent = tab === 'estatisticas' ? 'Sair' : 'Voltar';
+    lucide.createIcons();
+  }
 
   function openTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(name).classList.add('active');
+    updateBackBtn(name);
     if (name === 'utilizadores') loadUtilizadores();
   }
 
