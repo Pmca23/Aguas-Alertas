@@ -82,6 +82,13 @@
       flex-direction: column;
       gap: 6px;
       text-align: left;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .alerta-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
     }
 
     .alerta-card.critico {
@@ -89,9 +96,17 @@
       background: rgba(239,68,68,0.08);
     }
 
+    .alerta-card.critico:hover {
+      background: rgba(239,68,68,0.14);
+    }
+
     .alerta-card.aviso {
       border-color: rgba(245,158,11,0.4);
       background: rgba(245,158,11,0.08);
+    }
+
+    .alerta-card.aviso:hover {
+      background: rgba(245,158,11,0.14);
     }
 
     .alerta-top {
@@ -144,7 +159,7 @@
 
   <header>
     <img src="assets/images/logo.png" alt="Águas Alerta" class="logo">
-    <a href="pages/login.html" class="admin-btn">↪ Admin/Técnico</a>
+    <a href="pages/login.html" class="admin-btn">↪ Admin</a>
   </header>
 
   <main class="hero">
@@ -224,11 +239,11 @@
       dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
     }
 
-   function selecionarRio(nome) {
-  document.getElementById('searchInput').value = nome;
-  document.getElementById('dropdown').style.display = 'none';
-  window.location.href = `pages/dashboard.html?estacao=${encodeURIComponent(nome)}`;
-}
+    function selecionarRio(nome) {
+      document.getElementById('searchInput').value = nome;
+      document.getElementById('dropdown').style.display = 'none';
+      window.location.href = `pages/dashboard.html?estacao=${encodeURIComponent(nome)}`;
+    }
 
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', e => {
@@ -300,9 +315,10 @@
           const nivel = parseFloat(alerta.nivel_critico);
           const classe = nivel >= 5 ? 'critico' : 'aviso';
           const nivelLabel = classe === 'critico' ? 'Crítico' : 'Aviso';
+          const nomeEstacao = encodeURIComponent(alerta.nome_estacao);
 
           return `
-            <div class="alerta-card ${classe}">
+            <div class="alerta-card ${classe}" onclick="window.location.href='pages/dashboard.html?estacao=${nomeEstacao}'">
               <div class="alerta-top">
                 <span class="alerta-rio">${alerta.nome_estacao}</span>
                 <span class="alerta-nivel">${nivelLabel}</span>
