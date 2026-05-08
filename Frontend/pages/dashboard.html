@@ -189,12 +189,14 @@
   let alertasAtivos = [];
 
   function openTab(name, btn) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(name).classList.add('active');
-    if (name === 'alertas') renderAlertas();
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(name).classList.add('active');
+  if (name === 'alertas') {
+    loadAlertasAtivos().then(() => renderAlertas());
   }
+}
 
   function verificarAlertaEstacao(id) {
     return alertasAtivos.some(a => String(a.id_estacao) === String(id));
