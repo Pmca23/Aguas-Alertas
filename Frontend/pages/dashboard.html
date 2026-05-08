@@ -344,38 +344,49 @@
   }
 
   function renderAlertas() {
-    const list = document.getElementById('alertList');
-    document.getElementById('alertasTotal').textContent = `${alertasAtivos.length} alerta(s) ativo(s)`;
+  const list = document.getElementById('alertList');
+  document.getElementById('alertasTotal').textContent = `${alertasAtivos.length} alerta(s) ativo(s)`;
 
-    if (alertasAtivos.length === 0) {
-      list.innerHTML = `
-        <div class="alert-card ok">
-          <div class="alert-left">
-            <div class="alert-round"><i data-lucide="check" style="width:16px;height:16px;color:#4ade80;"></i></div>
-            <div class="alert-info">
-              <h3>Sem alertas ativos</h3>
-              <p>Todas as estações dentro dos níveis normais</p>
-            </div>
-          </div>
-        </div>`;
-      lucide.createIcons();
-      return;
-    }
-
-    list.innerHTML = alertasAtivos.map(a => `
-      <div class="alert-card">
+  if (alertasAtivos.length === 0) {
+    list.innerHTML = `
+      <div class="alert-card ok">
         <div class="alert-left">
-          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;color:#f87171;"></i></div>
+          <div class="alert-round"><i data-lucide="check" style="width:16px;height:16px;color:#4ade80;"></i></div>
           <div class="alert-info">
-            <h3>${a.nome_estacao}</h3>
-            <p>${a.localizacao}</p>
-            <span class="level-txt">Nível crítico: ${a.nivel_critico}m <span class="badge">CRÍTICO</span></span>
+            <h3>Sem alertas ativos</h3>
+            <p>Todas as estações dentro dos níveis normais</p>
           </div>
         </div>
-        <span class="time">${a.data_hora}</span>
-      </div>`).join('');
+      </div>`;
     lucide.createIcons();
+    return;
   }
+
+  list.innerHTML = alertasAtivos.map(a => `
+    <div class="alert-card" style="cursor:pointer;" onclick="irParaEstacao('${encodeURIComponent(a.nome_estacao)}')">
+      <div class="alert-left">
+        <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;color:#f87171;"></i></div>
+        <div class="alert-info">
+          <h3>${a.nome_estacao}</h3>
+          <p>${a.localizacao}</p>
+          <span class="level-txt">Nível crítico: ${a.nivel_critico}m <span class="badge">CRÍTICO</span></span>
+        </div>
+      </div>
+      <span class="time">${a.data_hora}</span>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function irParaEstacao(nomeEstacao) {
+  const sel = document.getElementById('estacaoSelect');
+  const nomeRio = decodeURIComponent(nomeEstacao).split('—')[0].trim();
+  const match = Array.from(sel.options).find(o => o.textContent.includes(nomeRio));
+  if (match) {
+    sel.value = match.value;
+    loadEstacao();
+    openTab('dashboard', document.querySelector('.tab'));
+  }
+}
 
   async function init() {
     await loadAlertasAtivos();
