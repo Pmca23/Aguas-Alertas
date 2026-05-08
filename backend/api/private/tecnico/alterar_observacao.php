@@ -14,7 +14,7 @@ if (!$id_obs || !is_numeric($id_obs) || !$texto) {
 $stmt = $conn->prepare("UPDATE observacoes SET observacao = ? WHERE id_observacao = ?");
 $stmt->bind_param("si", $texto, $id_obs);
 $stmt->execute();
-echo json_encode($stmt->affected_rows > 0
+echo json_encode($stmt->affected_rows >= 0
     ? ["status" => "ok", "mensagem" => "Observação atualizada"]
     : ["status" => "erro", "mensagem" => "Observação não encontrada"]);
 $stmt->close(); $conn->close();
