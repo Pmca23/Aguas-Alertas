@@ -379,10 +379,11 @@
         document.getElementById('dMedia').innerHTML = stats.data.media.toFixed(2) + ' <span>m</span>';
         document.getElementById('dMax').innerHTML   = stats.data.maximo.toFixed(2) + ' <span>m</span>';
       }
-      const r4 = await fetch(`${API}/api/private/tecnico/historico_periodo.php?id_estacao=${id}&dias=1`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
-      const recente = await r4.json();
-      if (recente.status === 'ok' && recente.data.length > 0) {
-        const nivelAtual = recente.data[recente.data.length - 1].nivel_agua;
+      const r4 = await fetch(`${API}/api/public/ultima_leitura.php`);
+const recente = await r4.json();
+const estacaoAtual = recente.status === 'ok' && recente.data.find(e => String(e.id_estacao) === String(id));
+if (estacaoAtual && estacaoAtual.nivel_agua != null) {
+  const nivelAtual = parseFloat(estacaoAtual.nivel_agua);
         document.getElementById('dNivel').innerHTML = nivelAtual.toFixed(2) + ' <span>m</span>';
         const maximo = stats?.data?.maximo || 10;
         const pct = Math.min((nivelAtual / (maximo * 1.2)) * 100, 100);
