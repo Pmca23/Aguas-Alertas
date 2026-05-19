@@ -1,83 +1,165 @@
-# Águas Alertas
+# Relatório Individual 1 — Paulo Alberto
 
-## Dashboard de Monitorização do Nível das Águas dos Rios
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
 
-*Relatório Individual — Fase Inicial do Projeto (#2)*
+## Trabalho Desenvolvido
+Durante esta fase inicial do projeto, comecei a preparação e estudo dos sensores que serão utilizados no sistema de monitorização ambiental.
 
----
+O principal foco foi compreender o funcionamento do ESP32 e a integração entre hardware e software. Foram realizados testes iniciais com diferentes sensores e com a comunicação Serial através do Arduino IDE.
 
-## 1. Detalhe das Tarefas Individuais em Curso
+### Atividades realizadas
+- Configuração inicial do ESP32;
+- Instalação do Arduino IDE e bibliotecas necessárias;
+- Testes básicos de comunicação Serial;
+- Estudo do sensor de chuva;
+- Estudo do sensor de temperatura DS18B20;
+- Verificação da alimentação e pinagem dos sensores.
 
-Nesta fase inicial do projeto, o foco principal tem sido a definição do conceito, levantamento de requisitos e planeamento da arquitetura do sistema. As tarefas realizadas durante esta semana foram as seguintes:
+## Dificuldades Encontradas
+- Problemas na deteção da porta COM do ESP32;
+- Necessidade de compreender melhor a ligação dos GPIO;
+- Configuração inicial das bibliotecas do Arduino IDE.
 
-### 1.1 Definição do Conceito e Objetivos do Projeto
-
-Foi definido o conceito central do projeto: uma plataforma web estilo dashboard para monitorização em tempo real do nível das águas dos rios, com foco na prevenção e aviso de cheias. O sistema visa disponibilizar dados de forma clara e acessível a autoridades, técnicos de proteção civil e população em geral.
-
-### 1.2 Levantamento de Requisitos Funcionais
-
-- Visualização do nível da água por rio/estação de medição em tempo real  
-- Sistema de alertas por níveis (verde, amarelo, laranja, vermelho)  
-- Mapa interativo com marcadores por estação hidrométrica  
-- Histórico de medições e gráficos de tendência  
-- Painel de administração para gestão de sensores e estações  
-- Notificações automáticas por e-mail/SMS em caso de alerta  
-
-### 1.3 Arquitetura Técnica Inicial
-
-Foi esboçada a arquitetura técnica do projeto, que inclui os seguintes componentes:
-
-- **Frontend:** Dashboard web responsivo (HTML/CSS/JS ou framework como React/Vue)  
-- **Backend:** API REST para receber e servir dados das estações de medição  
-- **Base de dados:** Armazenamento de leituras históricas e configurações  
-- **Integração:** Ligação a fontes de dados reais (ex.: SNIRH — Sistema Nacional de Informação de Recursos Hídricos)  
-
-### 1.4 Estado Atual das Atividades
-
-Estado de progresso das principais componentes do projeto:
-
-- Definição do tema e objetivos — **Concluído**  
-- Levantamento de requisitos iniciais — **Concluído**  
-- Pesquisa de APIs e fontes de dados hidrométricos — **Em curso**  
-- Prototipagem do dashboard (wireframes) — **Por iniciar**  
-- Configuração do repositório GitHub e estrutura do projeto — **Por iniciar**  
+## Contributo para o Projeto
+Contribuí principalmente na preparação e testes iniciais dos sensores físicos que irão fornecer dados ao sistema de monitorização.
 
 ---
 
-## 2. Reflexão Crítica Individual
+# Relatório Individual 2 — Paulo Alberto
 
-### 2.1 Resultados Obtidos vs. Objetivos Iniciais
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
 
-Esta fase inicial correu de forma positiva. Os objetivos propostos para esta semana — nomeadamente a conceção do projeto e o levantamento de requisitos — foram cumpridos. A ideia do projeto revelou-se pertinente e com impacto social real, o que motivou ainda mais o investimento nesta fase de planeamento.
+## Trabalho Desenvolvido
+Nesta fase continuei os testes relacionados com o sensor de chuva ligado ao ESP32.
 
-No entanto, o âmbito do projeto acabou por ser ligeiramente mais alargado do que o inicialmente previsto, uma vez que a integração com fontes de dados reais (como o SNIRH) introduz uma camada de complexidade adicional que não tinha sido inicialmente considerada.
+Foram realizados testes utilizando:
+- Saída digital (DO);
+- Saída analógica (AO).
 
-### 2.2 Dificuldades Encontradas e Estratégias de Resolução
+Também foi desenvolvido código para leitura de valores analógicos e deteção de chuva através do Serial Monitor.
 
-As principais dificuldades identificadas nesta fase foram:
+### Atividades realizadas
+- Ligação do sensor de chuva ao ESP32;
+- Testes de leitura analógica;
+- Ajuste da sensibilidade do sensor;
+- Desenvolvimento de código para deteção de chuva;
+- Testes práticos com água.
 
-- **Acesso a dados em tempo real:**  
-  A principal dificuldade prende-se com a disponibilidade e formato de dados hidrométricos em Portugal.  
-  **Estratégia:** investigar a API do SNIRH e avaliar alternativas como dados simulados para a fase de desenvolvimento.
+## Dificuldades Encontradas
+- Leituras incorretas mesmo sem água;
+- Necessidade de calibração do sensor;
+- Diferenças entre funcionamento digital e analógico.
 
-- **Definição do sistema de alertas:**  
-  Estabelecer os limiares de alerta (níveis verde/amarelo/laranja/vermelho) requer investigação técnica adicional.  
-  **Estratégia:** consultar documentação da ANPC (Autoridade Nacional de Emergência e Proteção Civil).
-
-- **Complexidade da interface:**  
-  Criar um dashboard informativo mas simples e intuitivo é um desafio de design.  
-  **Estratégia:** começar com wireframes simples e validar com utilizadores antes de avançar para o desenvolvimento.
-
-### 2.3 Tarefas em Atraso
-
-Não existem tarefas em atraso neste momento, dado tratar-se de um relatório da fase inicial. Contudo, a pesquisa de APIs de dados hidrométricos está a revelar-se mais demorada do que previsto, o que poderá condicionar o início da prototipagem na próxima semana.
-
-### 2.4 Outros Aspetos Relevantes
-
-O projeto **"Águas Alertas"** tem potencial de impacto real na sociedade, especialmente numa época em que os eventos de cheias são cada vez mais frequentes em Portugal. A sua relevância social é um fator motivador importante para o desenvolvimento do trabalho.
-
-Nos próximos passos, será fundamental definir claramente o **MVP (Minimum Viable Product)** do projeto, para garantir que o desenvolvimento se mantém focado e dentro do prazo estabelecido. A configuração do repositório GitHub e a organização do código desde o início serão também prioritárias.
+## Contributo para o Projeto
+Fiquei responsável pela validação do funcionamento do sensor de chuva e pela lógica inicial de deteção ambiental.
 
 ---
 
-*Projeto de Desenvolvimento Web — Relatório Individual #2*
+# Relatório Individual 3 — Paulo Alberto
+
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
+
+## Trabalho Desenvolvido
+Nesta fase foi iniciado o trabalho com o sensor de temperatura DS18B20 utilizando o ESP32.
+
+Foram realizados vários testes de leitura de temperatura em tempo real e configuração das bibliotecas necessárias.
+
+### Atividades realizadas
+- Instalação das bibliotecas OneWire e DallasTemperature;
+- Configuração do sensor DS18B20;
+- Testes de leitura de temperatura;
+- Verificação da estabilidade das leituras;
+- Testes de ligação utilizando diferentes GPIO.
+
+## Dificuldades Encontradas
+- Problemas de compilação no Arduino IDE;
+- Configuração incorreta de GPIO;
+- Dificuldades na deteção inicial do sensor;
+- Necessidade de utilização de resistor pull-up.
+
+## Contributo para o Projeto
+Contribuí no desenvolvimento da componente responsável pela recolha de temperatura ambiental.
+
+---
+
+# Relatório Individual 4 — Paulo Alberto
+
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
+
+## Trabalho Desenvolvido
+Durante esta fase foi iniciada a integração entre os sensores e a base de dados do projeto.
+
+O objetivo principal foi garantir que os dados recolhidos pelos sensores fossem corretamente enviados para o sistema.
+
+### Atividades realizadas
+- Testes de envio de dados;
+- Organização da estrutura de comunicação;
+- Verificação do fluxo de dados;
+- Testes de integração entre hardware e backend;
+- Apoio na definição dos dados apresentados no dashboard.
+
+## Dificuldades Encontradas
+- Sincronização entre sensores e backend;
+- Problemas de estabilidade em alguns testes;
+- Ajuste do formato dos dados enviados.
+
+## Contributo para o Projeto
+Contribuí na integração entre hardware e software, permitindo a preparação do sistema de monitorização em tempo real.
+
+---
+
+# Relatório Individual 5 — Paulo Alberto
+
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
+
+## Trabalho Desenvolvido
+Nesta etapa foram realizados testes mais completos ao sistema integrado.
+
+Os sensores foram testados em conjunto para validar o correto funcionamento da recolha de dados.
+
+### Atividades realizadas
+- Simulação de condições de chuva;
+- Testes contínuos dos sensores;
+- Verificação das leituras em tempo real;
+- Ajustes de precisão dos sensores;
+- Testes gerais do sistema.
+
+## Dificuldades Encontradas
+- Oscilações em alguns valores analógicos;
+- Necessidade de melhorar estabilidade das leituras;
+- Ajustes de alimentação dos sensores.
+
+## Contributo para o Projeto
+Ajudei a garantir que os sensores produzem dados consistentes para o dashboard de monitorização.
+
+---
+
+# Relatório Individual 6 — Paulo Alberto
+
+## Projeto
+Águas Alertas — Sistema de Monitorização do Nível das Águas dos Rios
+
+## Trabalho Desenvolvido
+Na fase final participei nos testes globais e validação do projeto.
+
+O foco principal foi garantir a correta comunicação entre sensores, base de dados e dashboard web.
+
+### Atividades realizadas
+- Testes finais do sistema;
+- Verificação da comunicação entre componentes;
+- Ajustes finais dos sensores;
+- Apoio na documentação técnica;
+- Preparação para apresentação do projeto.
+
+## Dificuldades Encontradas
+- Necessidade de otimizar parâmetros dos sensores;
+- Garantir estabilidade contínua das leituras;
+- Ajustes finais de integração.
+
+## Contributo para o Projeto
+O meu principal contributo foi na área de sensores e monitorização física, garantindo a recolha de dados ambientais para o sistema de alerta.
