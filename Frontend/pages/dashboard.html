@@ -27,12 +27,17 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .alert-banner { border-radius: 12px; padding: 20px 22px; display: flex; align-items: center; gap: 18px; margin-bottom: 24px; transition: all 0.3s; }
+    /* Banners */
+    .alert-banner { border-radius: 12px; padding: 20px 22px; display: flex; align-items: center; gap: 18px; margin-bottom: 16px; transition: all 0.3s; }
     .alert-banner.ok { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
     .alert-banner.danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); }
+    .alert-banner.rain { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.35); }
+    .alert-banner.no-rain { background: rgba(34,197,94,0.07); border: 1px solid rgba(34,197,94,0.25); }
     .alert-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .alert-icon.ok { background: rgba(34,197,94,0.15); color: #22c55e; }
     .alert-icon.danger { background: rgba(239,68,68,0.2); color: #f87171; }
+    .alert-icon.rain { background: rgba(96,165,250,0.2); color: #60a5fa; }
+    .alert-icon.no-rain { background: rgba(34,197,94,0.15); color: #22c55e; }
     .alert-banner h3 { font-size: 15px; margin-bottom: 3px; }
     .alert-banner p { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700; }
 
@@ -107,6 +112,7 @@
   <!-- DASHBOARD TAB -->
   <section id="dashboard" class="tab-content active">
 
+    <!-- Banner alerta nível -->
     <div class="alert-banner ok" id="alertBanner">
       <div class="alert-icon ok" id="alertIcon">
         <i data-lucide="activity" style="width:20px;height:20px;"></i>
@@ -114,6 +120,17 @@
       <div>
         <h3 id="alertTitle">Sem alertas ativos</h3>
         <p id="alertSubtitle">Estação dentro dos níveis normais</p>
+      </div>
+    </div>
+
+    <!-- Banner chuva -->
+    <div class="alert-banner no-rain" id="chuvaBanner">
+      <div class="alert-icon no-rain" id="chuvaIcon">
+        <i data-lucide="sun" style="width:20px;height:20px;"></i>
+      </div>
+      <div>
+        <h3 id="chuvaTitle">Sem precipitação</h3>
+        <p id="chuvaSubtitle">Sensor não deteta chuva neste momento</p>
       </div>
     </div>
 
@@ -189,14 +206,14 @@
   let alertasAtivos = [];
 
   function openTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(name).classList.add('active');
-  if (name === 'alertas') {
-    loadAlertasAtivos().then(() => renderAlertas());
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(name).classList.add('active');
+    if (name === 'alertas') {
+      loadAlertasAtivos().then(() => renderAlertas());
+    }
   }
-}
 
   function verificarAlertaEstacao(id) {
     return alertasAtivos.some(a => String(a.id_estacao) === String(id));
@@ -225,10 +242,10 @@
           opt.dataset.nivel = e.nivel_agua;
           opt.dataset.temp  = e.temperatura;
           opt.dataset.ts    = e.timestamp;
+          opt.dataset.chuva = e.chuva ? '1' : '0';
           sel.appendChild(opt);
         });
 
-        // Verificar se veio parâmetro da página principal
         const params = new URLSearchParams(window.location.search);
         const estacaoParam = params.get('estacao');
 
@@ -256,12 +273,14 @@
     const nivel = parseFloat(opt.dataset.nivel) || 0;
     const temp  = parseFloat(opt.dataset.temp)  || 0;
     const ts    = opt.dataset.ts || '—';
+    const chuva = opt.dataset.chuva === '1';
     const limite = 5.0;
 
     const emAlerta = verificarAlertaEstacao(id);
 
     document.getElementById('pageTitle').textContent = 'Monitoramento — ' + opt.textContent;
 
+    // Banner alerta nível
     const banner = document.getElementById('alertBanner');
     const icon   = document.getElementById('alertIcon');
     if (emAlerta) {
@@ -277,8 +296,27 @@
       document.getElementById('alertTitle').textContent    = 'Sem alertas ativos';
       document.getElementById('alertSubtitle').textContent = 'Estação dentro dos níveis normais';
     }
+
+    // Banner chuva
+    const chuvaBanner = document.getElementById('chuvaBanner');
+    const chuvaIcon   = document.getElementById('chuvaIcon');
+    if (chuva) {
+      chuvaBanner.className = 'alert-banner rain';
+      chuvaIcon.className   = 'alert-icon rain';
+      chuvaIcon.innerHTML   = '<i data-lucide="cloud-rain" style="width:20px;height:20px;"></i>';
+      document.getElementById('chuvaTitle').textContent    = 'Precipitação detetada';
+      document.getElementById('chuvaSubtitle').textContent = 'O sensor indica que está a chover nesta estação';
+    } else {
+      chuvaBanner.className = 'alert-banner no-rain';
+      chuvaIcon.className   = 'alert-icon no-rain';
+      chuvaIcon.innerHTML   = '<i data-lucide="sun" style="width:20px;height:20px;"></i>';
+      document.getElementById('chuvaTitle').textContent    = 'Sem precipitação';
+      document.getElementById('chuvaSubtitle').textContent = 'Sensor não deteta chuva neste momento';
+    }
+
     lucide.createIcons();
 
+    // Cards
     document.getElementById('valNivel').innerHTML = nivel.toFixed(2) + ' <span>m</span>';
     document.getElementById('subNivel').textContent = `Limite: ${limite}m`;
     const maxBarra = limite * 1.2;
@@ -346,49 +384,49 @@
   }
 
   function renderAlertas() {
-  const list = document.getElementById('alertList');
-  document.getElementById('alertasTotal').textContent = `${alertasAtivos.length} alerta(s) ativo(s)`;
+    const list = document.getElementById('alertList');
+    document.getElementById('alertasTotal').textContent = `${alertasAtivos.length} alerta(s) ativo(s)`;
 
-  if (alertasAtivos.length === 0) {
-    list.innerHTML = `
-      <div class="alert-card ok">
+    if (alertasAtivos.length === 0) {
+      list.innerHTML = `
+        <div class="alert-card ok">
+          <div class="alert-left">
+            <div class="alert-round"><i data-lucide="check" style="width:16px;height:16px;color:#4ade80;"></i></div>
+            <div class="alert-info">
+              <h3>Sem alertas ativos</h3>
+              <p>Todas as estações dentro dos níveis normais</p>
+            </div>
+          </div>
+        </div>`;
+      lucide.createIcons();
+      return;
+    }
+
+    list.innerHTML = alertasAtivos.map(a => `
+      <div class="alert-card" style="cursor:pointer;" onclick="irParaEstacao('${encodeURIComponent(a.nome_estacao)}')">
         <div class="alert-left">
-          <div class="alert-round"><i data-lucide="check" style="width:16px;height:16px;color:#4ade80;"></i></div>
+          <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;color:#f87171;"></i></div>
           <div class="alert-info">
-            <h3>Sem alertas ativos</h3>
-            <p>Todas as estações dentro dos níveis normais</p>
+            <h3>${a.nome_estacao}</h3>
+            <p>${a.localizacao}</p>
+            <span class="level-txt">Nível crítico: ${a.nivel_critico}m <span class="badge">CRÍTICO</span></span>
           </div>
         </div>
-      </div>`;
+        <span class="time">${a.data_hora}</span>
+      </div>`).join('');
     lucide.createIcons();
-    return;
   }
 
-  list.innerHTML = alertasAtivos.map(a => `
-    <div class="alert-card" style="cursor:pointer;" onclick="irParaEstacao('${encodeURIComponent(a.nome_estacao)}')">
-      <div class="alert-left">
-        <div class="alert-round"><i data-lucide="triangle-alert" style="width:16px;height:16px;color:#f87171;"></i></div>
-        <div class="alert-info">
-          <h3>${a.nome_estacao}</h3>
-          <p>${a.localizacao}</p>
-          <span class="level-txt">Nível crítico: ${a.nivel_critico}m <span class="badge">CRÍTICO</span></span>
-        </div>
-      </div>
-      <span class="time">${a.data_hora}</span>
-    </div>`).join('');
-  lucide.createIcons();
-}
-
-function irParaEstacao(nomeEstacao) {
-  const sel = document.getElementById('estacaoSelect');
-  const nomeRio = decodeURIComponent(nomeEstacao).split('—')[0].trim();
-  const match = Array.from(sel.options).find(o => o.textContent.includes(nomeRio));
-  if (match) {
-    sel.value = match.value;
-    loadEstacao();
-    openTab('dashboard', document.querySelector('.tab'));
+  function irParaEstacao(nomeEstacao) {
+    const sel = document.getElementById('estacaoSelect');
+    const nomeRio = decodeURIComponent(nomeEstacao).split('—')[0].trim();
+    const match = Array.from(sel.options).find(o => o.textContent.includes(nomeRio));
+    if (match) {
+      sel.value = match.value;
+      loadEstacao();
+      openTab('dashboard', document.querySelector('.tab'));
+    }
   }
-}
 
   async function init() {
     await loadAlertasAtivos();

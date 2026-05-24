@@ -1,0 +1,342 @@
+-- ============================================================
+-- ÁGUAS ALERTA · V.I.R.
+-- Script completo da base de dados (atualizado)
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS vir_db
+DEFAULT CHARACTER SET utf8mb4
+DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE vir_db;
+
+-- ============================================================
+-- ESTACOES
+-- ============================================================
+CREATE TABLE estacoes (
+    id_estacao INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    localizacao VARCHAR(100) NOT NULL,
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
+    nivel_max_seguranca FLOAT NOT NULL,
+    data_instalacao DATE
+);
+
+-- ============================================================
+-- LEITURAS
+-- ============================================================
+CREATE TABLE leituras (
+    id_leitura INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    nivel_agua FLOAT NOT NULL,
+    temperatura FLOAT,
+    chuva BOOLEAN DEFAULT FALSE,
+    em_alerta BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- ALERTAS
+-- ============================================================
+CREATE TABLE alertas (
+    id_alerta INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    nivel_critico FLOAT,
+    tipo ENUM('informacao','aviso','critico') DEFAULT 'aviso',
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('ativo','resolvido') DEFAULT 'ativo',
+    resolvido_em DATETIME,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- LOCALIDADES
+-- ============================================================
+CREATE TABLE localidades (
+    id_localidade INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    contacto_email VARCHAR(150),
+    contacto_tel VARCHAR(20),
+    nivel_prioridade INT DEFAULT 1,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- NOTIFICACOES
+-- ============================================================
+CREATE TABLE notificacoes (
+    id_notif INT AUTO_INCREMENT PRIMARY KEY,
+    id_alerta INT NOT NULL,
+    id_localidade INT NOT NULL,
+    canal ENUM('email','sms','sirene') NOT NULL,
+    enviada_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    sucesso BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_alerta) REFERENCES alertas(id_alerta)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_localidade) REFERENCES localidades(id_localidade)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- UTILIZADORES
+-- ============================================================
+CREATE TABLE utilizadores (
+    id_utilizador INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin','tecnico') DEFAULT 'tecnico',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- OBSERVACOES
+-- ============================================================
+CREATE TABLE observacoes (
+    id_observacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_estacao INT NOT NULL,
+    id_utilizador INT NOT NULL,
+    observacao TEXT NOT NULL,
+    data_registo DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_utilizador) REFERENCES utilizadores(id_utilizador)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- STORED PROCEDURE
+-- ============================================================
+DELIMITER $$
+
+CREATE PROCEDURE sp_registar_leitura(
+    IN p_id_estacao INT,
+    IN p_nivel FLOAT,
+    IN p_temp FLOAT,
+    IN p_chuva BOOLEAN
+)
+BEGIN
+    DECLARE v_nivel_max FLOAT;
+    DECLARE v_alerta BOOLEAN DEFAULT FALSE;
+    DECLARE v_existe INT DEFAULT 0;
+
+    SELECT nivel_max_seguranca
+    INTO v_nivel_max
+    FROM estacoes
+    WHERE id_estacao = p_id_estacao;
+
+    IF p_nivel > v_nivel_max THEN
+        SET v_alerta = TRUE;
+    END IF;
+
+    INSERT INTO leituras (id_estacao, nivel_agua, temperatura, chuva, em_alerta)
+    VALUES (p_id_estacao, p_nivel, p_temp, p_chuva, v_alerta);
+
+    IF v_alerta THEN
+        SELECT COUNT(*) INTO v_existe
+        FROM alertas
+        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+
+        IF v_existe = 0 THEN
+            INSERT INTO alertas (id_estacao, nivel_critico, tipo)
+            VALUES (p_id_estacao, p_nivel, 'critico');
+        END IF;
+    ELSE
+        UPDATE alertas
+        SET estado = 'resolvido', resolvido_em = NOW()
+        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================================
+-- VIEWS (versões atualizadas com LEFT JOIN e colunas corretas)
+-- ============================================================
+
+CREATE VIEW v_ultima_leitura AS
+SELECT
+    e.id_estacao,
+    e.nome,
+    e.localizacao,
+    e.latitude,
+    e.longitude,
+    l.timestamp,
+    l.nivel_agua,
+    l.temperatura,
+    l.chuva,
+    l.em_alerta
+FROM estacoes e
+LEFT JOIN leituras l ON l.id_leitura = (
+    SELECT id_leitura
+    FROM leituras
+    WHERE id_estacao = e.id_estacao
+    ORDER BY timestamp DESC
+    LIMIT 1
+);
+
+CREATE VIEW v_alertas_ativos AS
+SELECT
+    a.id_alerta,
+    a.id_estacao,
+    a.nivel_critico,
+    a.tipo,
+    a.data_hora,
+    a.estado,
+    e.nome,
+    e.localizacao
+FROM alertas a
+JOIN estacoes e ON e.id_estacao = a.id_estacao
+WHERE a.estado = 'ativo';
+
+-- ============================================================
+-- POPULATE — ESTACOES
+-- ============================================================
+INSERT INTO estacoes (nome, localizacao, latitude, longitude, nivel_max_seguranca, data_instalacao) VALUES
+('Tejo — Santarém',       'Santarém',         39.2369, -8.6881, 5.0, '2026-03-01'),
+('Douro — Porto',         'Porto',            41.1579, -8.6291, 4.5, '2026-03-01'),
+('Mondego — Coimbra',     'Coimbra',          40.2056, -8.4194, 4.0, '2026-03-08'),
+('Guadiana — Évora',      'Évora',            38.5710, -7.9135, 3.5, '2026-03-10'),
+('Lima — Viana do Castelo','Viana do Castelo', 41.6932, -8.8329, 4.2, '2026-03-12');
+
+-- ============================================================
+-- POPULATE — LOCALIDADES
+-- ============================================================
+INSERT INTO localidades (id_estacao, nome, contacto_email, contacto_tel, nivel_prioridade) VALUES
+(1, 'Proteção Civil Santarém', 'santarem@pc.pt', '243000000', 1),
+(1, 'Junta Local Santarém',    'junta@st.pt',    '243111111', 2),
+(2, 'Proteção Civil Porto',    'porto@pc.pt',    '222000000', 1),
+(3, 'Proteção Civil Coimbra',  'coimbra@pc.pt',  '239000000', 1);
+
+-- ============================================================
+-- POPULATE — LEITURAS (últimos 7 dias por estação)
+-- ============================================================
+INSERT INTO leituras (id_estacao, timestamp, nivel_agua, temperatura, chuva, em_alerta) VALUES
+-- Tejo — Santarém (id=1)
+(1, NOW(),                      4.20, 14.0, FALSE, FALSE),
+(1, NOW() - INTERVAL 1 HOUR,   4.10, 14.1, FALSE, FALSE),
+(1, NOW() - INTERVAL 2 HOUR,   3.95, 14.3, FALSE, FALSE),
+(1, NOW() - INTERVAL 3 HOUR,   3.80, 14.5, FALSE, FALSE),
+(1, NOW() - INTERVAL 6 HOUR,   3.60, 14.8, FALSE, FALSE),
+(1, NOW() - INTERVAL 12 HOUR,  3.40, 15.0, FALSE, FALSE),
+(1, NOW() - INTERVAL 1 DAY,    3.20, 15.2, FALSE, FALSE),
+(1, NOW() - INTERVAL 2 DAY,    3.50, 14.9, FALSE, FALSE),
+(1, NOW() - INTERVAL 3 DAY,    4.80, 13.8, TRUE,  FALSE),
+(1, NOW() - INTERVAL 4 DAY,    5.10, 13.5, TRUE,  TRUE),
+(1, NOW() - INTERVAL 5 DAY,    4.60, 13.9, FALSE, FALSE),
+(1, NOW() - INTERVAL 6 DAY,    3.90, 14.4, FALSE, FALSE),
+
+-- Douro — Porto (id=2)
+(2, NOW(),                      1.90, 16.7, FALSE, FALSE),
+(2, NOW() - INTERVAL 1 HOUR,   1.85, 16.8, FALSE, FALSE),
+(2, NOW() - INTERVAL 2 HOUR,   1.80, 16.9, FALSE, FALSE),
+(2, NOW() - INTERVAL 3 HOUR,   1.75, 17.0, FALSE, FALSE),
+(2, NOW() - INTERVAL 6 HOUR,   1.70, 17.2, FALSE, FALSE),
+(2, NOW() - INTERVAL 12 HOUR,  1.65, 17.5, FALSE, FALSE),
+(2, NOW() - INTERVAL 1 DAY,    1.60, 17.8, FALSE, FALSE),
+(2, NOW() - INTERVAL 2 DAY,    1.80, 17.0, FALSE, FALSE),
+(2, NOW() - INTERVAL 3 DAY,    2.10, 16.5, FALSE, FALSE),
+(2, NOW() - INTERVAL 4 DAY,    2.30, 16.2, FALSE, FALSE),
+(2, NOW() - INTERVAL 5 DAY,    2.00, 16.6, FALSE, FALSE),
+(2, NOW() - INTERVAL 6 DAY,    1.75, 16.9, FALSE, FALSE),
+
+-- Mondego — Coimbra (id=3)
+(3, NOW(),                      1.00, 18.3, FALSE, FALSE),
+(3, NOW() - INTERVAL 1 HOUR,   1.05, 18.2, FALSE, FALSE),
+(3, NOW() - INTERVAL 2 HOUR,   1.10, 18.1, FALSE, FALSE),
+(3, NOW() - INTERVAL 3 HOUR,   1.15, 18.0, FALSE, FALSE),
+(3, NOW() - INTERVAL 6 HOUR,   1.20, 17.8, FALSE, FALSE),
+(3, NOW() - INTERVAL 12 HOUR,  1.30, 17.5, FALSE, FALSE),
+(3, NOW() - INTERVAL 1 DAY,    1.25, 17.7, FALSE, FALSE),
+(3, NOW() - INTERVAL 2 DAY,    1.40, 17.3, FALSE, FALSE),
+(3, NOW() - INTERVAL 3 DAY,    1.60, 17.0, TRUE,  FALSE),
+(3, NOW() - INTERVAL 4 DAY,    1.50, 17.1, FALSE, FALSE),
+(3, NOW() - INTERVAL 5 DAY,    1.35, 17.4, FALSE, FALSE),
+(3, NOW() - INTERVAL 6 DAY,    1.10, 17.9, FALSE, FALSE),
+
+-- Guadiana — Évora (id=4)
+(4, NOW(),                      2.35, 22.2, FALSE, FALSE),
+(4, NOW() - INTERVAL 1 HOUR,   2.40, 22.0, FALSE, FALSE),
+(4, NOW() - INTERVAL 2 HOUR,   2.45, 21.8, FALSE, FALSE),
+(4, NOW() - INTERVAL 3 HOUR,   2.50, 21.6, FALSE, FALSE),
+(4, NOW() - INTERVAL 6 HOUR,   2.55, 21.4, FALSE, FALSE),
+(4, NOW() - INTERVAL 12 HOUR,  2.60, 21.2, FALSE, FALSE),
+(4, NOW() - INTERVAL 1 DAY,    2.45, 21.5, FALSE, FALSE),
+(4, NOW() - INTERVAL 2 DAY,    2.70, 21.0, FALSE, FALSE),
+(4, NOW() - INTERVAL 3 DAY,    3.00, 20.5, TRUE,  FALSE),
+(4, NOW() - INTERVAL 4 DAY,    2.80, 20.8, FALSE, FALSE),
+(4, NOW() - INTERVAL 5 DAY,    2.60, 21.1, FALSE, FALSE),
+(4, NOW() - INTERVAL 6 DAY,    2.40, 21.6, FALSE, FALSE),
+
+-- Lima — Viana do Castelo (id=5)
+(5, NOW(),                      1.45, 14.4, FALSE, FALSE),
+(5, NOW() - INTERVAL 1 HOUR,   1.42, 14.5, FALSE, FALSE),
+(5, NOW() - INTERVAL 2 HOUR,   1.38, 14.6, FALSE, FALSE),
+(5, NOW() - INTERVAL 3 HOUR,   1.35, 14.7, FALSE, FALSE),
+(5, NOW() - INTERVAL 6 HOUR,   1.30, 14.9, FALSE, FALSE),
+(5, NOW() - INTERVAL 12 HOUR,  1.25, 15.1, FALSE, FALSE),
+(5, NOW() - INTERVAL 1 DAY,    1.20, 15.3, FALSE, FALSE),
+(5, NOW() - INTERVAL 2 DAY,    1.40, 14.8, FALSE, FALSE),
+(5, NOW() - INTERVAL 3 DAY,    1.65, 14.3, TRUE,  FALSE),
+(5, NOW() - INTERVAL 4 DAY,    1.55, 14.5, FALSE, FALSE),
+(5, NOW() - INTERVAL 5 DAY,    1.35, 14.8, FALSE, FALSE),
+(5, NOW() - INTERVAL 6 DAY,    1.20, 15.2, FALSE, FALSE);
+
+-- ============================================================
+-- POPULATE — ALERTAS
+-- ============================================================
+INSERT INTO alertas (id_estacao, nivel_critico, tipo, estado) VALUES
+(1, 5.0, 'critico', 'ativo'),
+(2, 4.5, 'aviso',   'resolvido'),
+(3, 4.0, 'aviso',   'ativo');
+
+-- ============================================================
+-- POPULATE — NOTIFICACOES
+-- ============================================================
+INSERT INTO notificacoes (id_alerta, id_localidade, canal, sucesso) VALUES
+(1, 1, 'email',  TRUE),
+(1, 1, 'sms',    TRUE),
+(1, 1, 'sirene', TRUE),
+(2, 3, 'email',  TRUE);
+
+-- ============================================================
+-- POPULATE — OBSERVACOES
+-- (requer utilizadores criados pelo sistema de login)
+-- Descomentar após criar utilizadores via painel
+-- ============================================================
+-- INSERT INTO observacoes (id_estacao, id_utilizador, observacao, data_registo) VALUES
+-- (1, 1, 'Subida rápida do nível da água após precipitação intensa.', NOW() - INTERVAL 2 HOUR),
+-- (1, 1, 'Zona ribeirinha monitorizada. Situação estabilizada.', NOW() - INTERVAL 1 HOUR),
+-- (2, 1, 'Sem risco imediato. Valores dentro do normal.', NOW() - INTERVAL 45 MINUTE),
+-- (3, 1, 'Pequena variação registada durante a madrugada.', NOW() - INTERVAL 30 MINUTE),
+-- (1, 1, 'Necessário reforçar vigilância nas próximas horas.', NOW() - INTERVAL 10 MINUTE);
+
+ALTER TABLE leituras ADD COLUMN chuva BOOLEAN DEFAULT FALSE;
+
+USE vir_db;
+
+CREATE OR REPLACE VIEW v_ultima_leitura AS
+SELECT
+    e.id_estacao,
+    e.nome,
+    e.localizacao,
+    e.latitude,
+    e.longitude,
+    l.timestamp,
+    l.nivel_agua,
+    l.temperatura,
+    l.chuva,
+    l.em_alerta
+FROM estacoes e
+LEFT JOIN leituras l ON l.id_leitura = (
+    SELECT id_leitura
+    FROM leituras
+    WHERE id_estacao = e.id_estacao
+    ORDER BY timestamp DESC
+    LIMIT 1
+);
