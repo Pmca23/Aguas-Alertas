@@ -315,3 +315,28 @@ INSERT INTO notificacoes (id_alerta, id_localidade, canal, sucesso) VALUES
 -- (2, 1, 'Sem risco imediato. Valores dentro do normal.', NOW() - INTERVAL 45 MINUTE),
 -- (3, 1, 'Pequena variação registada durante a madrugada.', NOW() - INTERVAL 30 MINUTE),
 -- (1, 1, 'Necessário reforçar vigilância nas próximas horas.', NOW() - INTERVAL 10 MINUTE);
+
+ALTER TABLE leituras ADD COLUMN chuva BOOLEAN DEFAULT FALSE;
+
+USE vir_db;
+
+CREATE OR REPLACE VIEW v_ultima_leitura AS
+SELECT
+    e.id_estacao,
+    e.nome,
+    e.localizacao,
+    e.latitude,
+    e.longitude,
+    l.timestamp,
+    l.nivel_agua,
+    l.temperatura,
+    l.chuva,
+    l.em_alerta
+FROM estacoes e
+LEFT JOIN leituras l ON l.id_leitura = (
+    SELECT id_leitura
+    FROM leituras
+    WHERE id_estacao = e.id_estacao
+    ORDER BY timestamp DESC
+    LIMIT 1
+);
