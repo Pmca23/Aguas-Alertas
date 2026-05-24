@@ -31,20 +31,21 @@ VALUES
 -- LEITURAS
 -- ============================================================
 INSERT INTO leituras
-(id_estacao, timestamp, nivel_agua, temperatura, em_alerta)
+(id_estacao, timestamp, nivel_agua, temperatura, chuva, em_alerta)
 VALUES
-(1,NOW()-INTERVAL 60 MINUTE,1.5,15,FALSE),
-(1,NOW()-INTERVAL 50 MINUTE,2.0,15,FALSE),
-(1,NOW()-INTERVAL 40 MINUTE,3.5,14,FALSE),
-(1,NOW()-INTERVAL 30 MINUTE,5.5,13,TRUE),
-(1,NOW()-INTERVAL 20 MINUTE,6.0,13,TRUE),
-(1,NOW()-INTERVAL 10 MINUTE,4.0,14,FALSE),
 
-(2,NOW()-INTERVAL 20 MINUTE,2.0,12,FALSE),
-(2,NOW(),2.5,12,FALSE),
+(1,NOW()-INTERVAL 60 MINUTE,1.5,15,TRUE,FALSE),
+(1,NOW()-INTERVAL 50 MINUTE,2.0,15,TRUE,FALSE),
+(1,NOW()-INTERVAL 40 MINUTE,3.5,14,FALSE,FALSE),
+(1,NOW()-INTERVAL 30 MINUTE,5.5,13,TRUE,TRUE),
+(1,NOW()-INTERVAL 20 MINUTE,6.0,13,TRUE,TRUE),
+(1,NOW()-INTERVAL 10 MINUTE,4.0,14,FALSE,FALSE),
 
-(3,NOW()-INTERVAL 15 MINUTE,1.5,13,FALSE),
-(3,NOW(),1.7,13,FALSE);
+(2,NOW()-INTERVAL 20 MINUTE,2.0,12,FALSE,FALSE),
+(2,NOW(),2.5,12,FALSE,FALSE),
+
+(3,NOW()-INTERVAL 15 MINUTE,1.5,13,TRUE,FALSE),
+(3,NOW(),1.7,13,FALSE,FALSE);
 
 -- ============================================================
 -- ALERTAS
@@ -74,7 +75,15 @@ INSERT INTO observacoes
 (id_estacao,id_utilizador,observacao,data_registo)
 VALUES
 (1,2,'Subida rápida do nível da água após precipitação intensa.', NOW() - INTERVAL 2 HOUR),
-(1,2,'Zona ribeirinha monitorizada. Situação estabilizada.', NOW() - INTERVAL 1 HOUR),
-(2,2,'Sem risco imediato. Valores dentro do normal.', NOW() - INTERVAL 45 MINUTE),
-(3,2,'Pequena variação registada durante a madrugada.', NOW() - INTERVAL 30 MINUTE),
-(1,2,'Necessário reforçar vigilância nas próximas horas.', NOW() - INTERVAL 10 MINUTE);
+
+(1,2,'Zona ribeirinha monitorizada. Situação estabilizada.',
+NOW() - INTERVAL 1 HOUR),
+
+(2,2,'Sem risco imediato. Valores dentro do normal.',
+NOW() - INTERVAL 45 MINUTE),
+
+(3,2,'Pequena variação registada durante a madrugada.',
+NOW() - INTERVAL 30 MINUTE),
+
+(1,2,'Necessário reforçar vigilância nas próximas horas.',
+NOW() - INTERVAL 10 MINUTE);
