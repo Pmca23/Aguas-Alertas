@@ -4,6 +4,7 @@ header("Content-Type: application/json");
 require_once "../../config/db.php";
 
 $sql = "SELECT * FROM v_ultima_leitura";
+
 $result = $conn->query($sql);
 
 $data = [];
@@ -13,15 +14,36 @@ if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
 
         $data[] = [
-            "id_estacao"   => $row["id_estacao"],
-            "nome"         => $row["nome"],
-            "localizacao"  => $row["localizacao"],
-            "latitude"     => $row["latitude"],
-            "longitude"    => $row["longitude"],
-            "timestamp"    => $row["timestamp"],
-            "nivel_agua"   => $row["nivel_agua"],
-            "temperatura"  => $row["temperatura"],
-            "em_alerta"    => (bool)$row["em_alerta"]
+
+            "id_estacao" =>
+                $row["id_estacao"],
+
+            "nome" =>
+                $row["nome"],
+
+            "localizacao" =>
+                $row["localizacao"],
+
+            "latitude" =>
+                $row["latitude"],
+
+            "longitude" =>
+                $row["longitude"],
+
+            "timestamp" =>
+                $row["timestamp"],
+
+            "nivel_agua" =>
+                (float)$row["nivel_agua"],
+
+            "temperatura" =>
+                (float)$row["temperatura"],
+
+            "chuva" =>
+                (bool)$row["chuva"],
+
+            "em_alerta" =>
+                (bool)$row["em_alerta"]
         ];
     }
 }
@@ -29,7 +51,7 @@ if ($result && $result->num_rows > 0) {
 echo json_encode([
     "status" => "ok",
     "data" => $data
-]);
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 $conn->close();
 ?>

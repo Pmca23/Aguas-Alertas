@@ -8,14 +8,18 @@ require_once "../../../config/db.php";
 verificarRoles(["tecnico"]);
 
 $id_estacao = $_GET["id_estacao"] ?? null;
-$dias       = $_GET["dias"] ?? 7;
+$dias = $_GET["dias"] ?? 7;
 
-if (!$id_estacao || !is_numeric($id_estacao)) {
+if (
+    !$id_estacao ||
+    !is_numeric($id_estacao)
+) {
 
     echo json_encode([
         "status" => "erro",
         "mensagem" => "Estação inválida"
     ]);
+
     exit;
 }
 
@@ -24,13 +28,14 @@ if (!is_numeric($dias) || $dias <= 0) {
 }
 
 $id_estacao = (int)$id_estacao;
-$dias       = (int)$dias;
+$dias = (int)$dias;
 
 $stmt = $conn->prepare("
 SELECT 
     timestamp,
     nivel_agua,
     temperatura,
+    chuva,
     em_alerta
 FROM leituras
 WHERE id_estacao = ?
@@ -39,6 +44,7 @@ ORDER BY timestamp ASC
 ");
 
 $stmt->bind_param("ii", $id_estacao, $dias);
+
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -48,10 +54,21 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
 
     $data[] = [
-        "timestamp"   => $row["timestamp"],
-        "nivel_agua"  => (float)$row["nivel_agua"],
-        "temperatura" => (float)$row["temperatura"],
-        "em_alerta"   => (bool)$row["em_alerta"]
+
+        "timestamp" =>
+            $row["timestamp"],
+
+        "nivel_agua" =>
+            (float)$row["nivel_agua"],
+
+        "temperatura" =>
+            (float)$row["temperatura"],
+
+        "chuva" =>
+            (bool)$row["chuva"],
+
+        "em_alerta" =>
+            (bool)$row["em_alerta"]
     ];
 }
 

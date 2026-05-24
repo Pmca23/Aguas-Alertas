@@ -11,6 +11,7 @@ verificarRoles(["admin","tecnico"]);
 $id_estacao = $_POST["id_estacao"] ?? null;
 $nivel = $_POST["nivel"] ?? null;
 $temp = $_POST["temperatura"] ?? null;
+$chuva = $_POST["chuva"] ?? 0;
 
 if (
     !$id_estacao || !is_numeric($id_estacao) ||
@@ -25,16 +26,32 @@ if (
 
 $id_estacao = (int)$id_estacao;
 $nivel = (float)$nivel;
-$temp = ($temp !== null && is_numeric($temp)) ? (float)$temp : null;
 
-$stmt = $conn->prepare("CALL sp_registar_leitura(?, ?, ?)");
-$stmt->bind_param("idd", $id_estacao, $nivel, $temp);
+$temp = ($temp !== null && is_numeric($temp))
+    ? (float)$temp
+    : null;
+
+$chuva = ($chuva == 1) ? 1 : 0;
+
+$stmt = $conn->prepare("
+CALL sp_registar_leitura(?, ?, ?, ?)
+");
+
+$stmt->bind_param(
+    "iddi",
+    $id_estacao,
+    $nivel,
+    $temp,
+    $chuva
+);
 
 if (!$stmt->execute()) {
+
     echo json_encode([
         "status" => "erro",
         "mensagem" => $stmt->error
     ]);
+
     exit;
 }
 
@@ -43,7 +60,8 @@ $stmt->close();
 $stmt = $conn->prepare("
 SELECT a.id_alerta, e.nome
 FROM alertas a
-JOIN estacoes e ON e.id_estacao = a.id_estacao
+JOIN estacoes e
+ON e.id_estacao = a.id_estacao
 WHERE a.id_estacao = ?
 AND a.estado = 'ativo'
 ORDER BY a.id_alerta DESC
@@ -84,15 +102,25 @@ if ($alerta) {
 
         if ($email) {
 
-            $assunto = "ALERTA CHEIA - " . $nome_estacao;
+            $assunto =
+                "ALERTA CHEIA - " . $nome_estacao;
+
+            $estado_chuva =
+                $chuva ? "Sim" : "Não";
 
             $mensagem =
                 "Localidade: $nome_local\n" .
                 "Estação: $nome_estacao\n" .
                 "Nível atual: $nivel m\n" .
+                "Temperatura: $temp °C\n" .
+                "Chuva: $estado_chuva\n" .
                 "Situação crítica detetada.";
 
-            $ok = enviarAlertaEmail($email, $assunto, $mensagem);
+            $ok = enviarAlertaEmail(
+                $email,
+                $assunto,
+                $mensagem
+            );
 
             $canal = "email";
             $sucesso = $ok ? 1 : 0;
@@ -124,6 +152,7 @@ if ($alerta) {
 echo json_encode([
     "status" => "ok",
     "mensagem" => "Leitura registada",
+    "chuva" => (bool)$chuva,
     "emails_enviados" => $emails_enviados
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 

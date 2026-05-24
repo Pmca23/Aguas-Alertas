@@ -4,13 +4,16 @@ header("Content-Type: application/json");
 require_once "../../config/db.php";
 
 $sql = "
-SELECT l.timestamp,
-       e.nome,
-       l.nivel_agua,
-       l.temperatura,
-       l.em_alerta
+SELECT 
+    l.timestamp,
+    e.nome,
+    l.nivel_agua,
+    l.temperatura,
+    l.chuva,
+    l.em_alerta
 FROM leituras l
-JOIN estacoes e ON l.id_estacao = e.id_estacao
+JOIN estacoes e
+ON l.id_estacao = e.id_estacao
 ORDER BY l.timestamp DESC
 LIMIT 30
 ";
@@ -19,21 +22,34 @@ $result = $conn->query($sql);
 
 $data = [];
 
-while($row = $result->fetch_assoc()){
+while ($row = $result->fetch_assoc()) {
 
     $data[] = [
-        "timestamp" => $row["timestamp"],
-        "nome" => $row["nome"],
-        "nivel_agua" => $row["nivel_agua"],
-        "temperatura" => $row["temperatura"],
-        "em_alerta" => (bool)$row["em_alerta"]
+
+        "timestamp" =>
+            $row["timestamp"],
+
+        "nome" =>
+            $row["nome"],
+
+        "nivel_agua" =>
+            (float)$row["nivel_agua"],
+
+        "temperatura" =>
+            (float)$row["temperatura"],
+
+        "chuva" =>
+            (bool)$row["chuva"],
+
+        "em_alerta" =>
+            (bool)$row["em_alerta"]
     ];
 }
 
 echo json_encode([
     "status" => "ok",
     "data" => $data
-]);
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 $conn->close();
 ?>
