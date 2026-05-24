@@ -48,6 +48,40 @@
     .logo { cursor: pointer; transition: opacity 0.2s; }
     .logo:hover { opacity: 0.8; }
 
+    /* Hero centrado */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .hero-text {
+      text-align: center;
+    }
+    .search-wrapper {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Botão Guia */
+    .guia-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: white;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .guia-btn:hover { background: rgba(255,255,255,0.15); }
+
     /* Modal */
     .modal-overlay {
       display: none;
@@ -70,6 +104,8 @@
       position: relative;
       animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
       box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+      max-height: 90vh;
+      overflow-y: auto;
     }
     @keyframes modalIn {
       from { opacity:0; transform: translateY(20px) scale(0.97); }
@@ -112,6 +148,33 @@
       color: rgba(255,255,255,0.8);
     }
     .modal-feature-icon { color: #60a5fa; flex-shrink: 0; }
+
+    
+    .guia-step {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .guia-step-num {
+      background: #2563eb;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .guia-step-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .guia-step-text p { font-size: 13px; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.5; }
   </style>
 </head>
 
@@ -119,7 +182,13 @@
 
   <header>
     <img src="assets/images/logo.png" alt="Águas Alerta" class="logo" onclick="abrirModal()">
-    <a href="pages/login.html" class="admin-btn">↪ Login</a>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button class="guia-btn" onclick="abrirGuia()">
+        <i data-lucide="book-open" style="width:15px;height:15px;"></i>
+        Guia do Utilizador
+      </button>
+      <a href="pages/login.html" class="admin-btn">↪ Login</a>
+    </div>
   </header>
 
   <main class="hero">
@@ -128,7 +197,7 @@
       <p>em todo o sítio perto de si</p>
     </section>
 
-    <!-- Barra de pesquisa com dropdown -->
+    <!-- Barra de pesquisa  -->
     <div class="search-wrapper" style="position:relative; width:560px; max-width:85%;">
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Escolha uma estação..."
@@ -177,14 +246,14 @@
       </div>
     </section>
 
-    <!-- Mapa (escondido por defeito) -->
+    <!-- Mapa  -->
     <div id="map" style="display:none;"></div>
   </main>
 
   <!-- Modal Quem Somos -->
   <div class="modal-overlay" id="modalQuemSomos" onclick="fecharModalFora(event)">
     <div class="modal">
-      <button class="modal-close" onclick="fecharModal()">
+      <button class="modal-close" onclick="fecharModal('modalQuemSomos')">
         <i data-lucide="x" style="width:16px;height:16px;"></i>
       </button>
       <div class="modal-logo">
@@ -222,6 +291,65 @@
     </div>
   </div>
 
+  
+  <div class="modal-overlay" id="modalGuia" onclick="fecharModalGuiaFora(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="fecharModal('modalGuia')">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+      <div class="modal-logo">
+        <img src="assets/images/logosemtexto.png" alt="Águas Alerta">
+        <h2>Guia do Utilizador</h2>
+      </div>
+      <div class="modal-divider"></div>
+      <p>Bem-vindo ao <strong>Águas Alerta</strong>! Aqui explicamos como navegar no site.</p>
+
+      <div class="guia-step">
+        <div class="guia-step-num">1</div>
+        <div class="guia-step-text">
+          <h4>Escolher uma estação</h4>
+          <p>Na página principal, clica na barra de pesquisa e seleciona o rio que queres monitorizar. Podes escolher entre Tejo, Douro, Mondego, Guadiana e Lima.</p>
+        </div>
+      </div>
+
+      <div class="guia-step">
+        <div class="guia-step-num">2</div>
+        <div class="guia-step-text">
+          <h4>Ver o dashboard da estação</h4>
+          <p>Após selecionar uma estação, és redirecionado para o dashboard com o nível atual do rio, temperatura da água e gráfico histórico de leituras.</p>
+        </div>
+      </div>
+
+      <div class="guia-step">
+        <div class="guia-step-num">3</div>
+        <div class="guia-step-text">
+          <h4>Verificar alertas ativos</h4>
+          <p>Os alertas ativos aparecem na página principal e no dashboard da estação. Um alerta vermelho indica situação crítica; amarelo indica aviso.</p>
+        </div>
+      </div>
+
+      <div class="guia-step">
+        <div class="guia-step-num">4</div>
+        <div class="guia-step-text">
+          <h4>Ver no mapa</h4>
+          <p>Clica no ícone do mapa na barra de pesquisa para ver a localização das estações no mapa de Portugal. Podes também usar a geolocalização para encontrar estações perto de ti.</p>
+        </div>
+      </div>
+
+      <div class="guia-step">
+        <div class="guia-step-num">5</div>
+        <div class="guia-step-text">
+          <h4>Área de técnicos</h4>
+          <p>O botão <strong>Login</strong> no canto superior direito dá acesso ao painel técnico, reservado a utilizadores com credenciais. Permite gerir alertas, registar observações e consultar histórico detalhado.</p>
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:rgba(255,255,255,0.45); margin-top:8px;">
+        Para mais informações, clica no logótipo para saber quem somos.
+      </p>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
@@ -233,19 +361,29 @@
     let mapaIniciado = false;
     let map;
 
-    // Modal
+    // Modais
     function abrirModal() {
       document.getElementById('modalQuemSomos').classList.add('open');
       lucide.createIcons();
     }
-    function fecharModal() {
-      document.getElementById('modalQuemSomos').classList.remove('open');
+    function abrirGuia() {
+      document.getElementById('modalGuia').classList.add('open');
+      lucide.createIcons();
+    }
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('open');
     }
     function fecharModalFora(e) {
-      if (e.target === document.getElementById('modalQuemSomos')) fecharModal();
+      if (e.target === document.getElementById('modalQuemSomos')) fecharModal('modalQuemSomos');
+    }
+    function fecharModalGuiaFora(e) {
+      if (e.target === document.getElementById('modalGuia')) fecharModal('modalGuia');
     }
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') fecharModal();
+      if (e.key === 'Escape') {
+        fecharModal('modalQuemSomos');
+        fecharModal('modalGuia');
+      }
     });
 
     // Dropdown
@@ -267,7 +405,7 @@
       }
     });
 
-    // Mapa
+    
     function toggleMapa() {
       const mapEl = document.getElementById('map');
       mapaAberto = !mapaAberto;
@@ -279,7 +417,7 @@
       }
     }
 
-    // Geolocalização
+    
     document.getElementById('btnLocalizacao').addEventListener('click', () => {
       navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude;
@@ -297,7 +435,7 @@
       });
     });
 
-    // Carregar alertas da API
+    
     async function carregarAlertas() {
       try {
         const res = await fetch(`${API_BASE}/api/public/alertas_ativos.php`);
