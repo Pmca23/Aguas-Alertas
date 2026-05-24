@@ -30,6 +30,7 @@ CREATE TABLE leituras (
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     nivel_agua FLOAT NOT NULL,
     temperatura FLOAT,
+    chuva BOOLEAN DEFAULT FALSE,
     em_alerta BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_estacao) REFERENCES estacoes(id_estacao)
         ON DELETE CASCADE ON UPDATE CASCADE
@@ -117,42 +118,75 @@ DELIMITER $$
 CREATE PROCEDURE sp_registar_leitura(
     IN p_id_estacao INT,
     IN p_nivel FLOAT,
-    IN p_temp FLOAT
+    IN p_temp FLOAT,
+    IN p_chuva BOOLEAN
 )
 BEGIN
+
     DECLARE v_nivel_max FLOAT;
     DECLARE v_alerta BOOLEAN DEFAULT FALSE;
     DECLARE v_existe INT DEFAULT 0;
 
     SELECT nivel_max_seguranca
     INTO v_nivel_max
-    FROM estacoes WHERE id_estacao = p_id_estacao;
+    FROM estacoes
+    WHERE id_estacao = p_id_estacao;
 
     IF p_nivel > v_nivel_max THEN
         SET v_alerta = TRUE;
     END IF;
 
-    INSERT INTO leituras (id_estacao, nivel_agua, temperatura, em_alerta)
-    VALUES (p_id_estacao, p_nivel, p_temp, v_alerta);
+    INSERT INTO leituras (
+        id_estacao,
+        nivel_agua,
+        temperatura,
+        chuva,
+        em_alerta
+    )
+    VALUES (
+        p_id_estacao,
+        p_nivel,
+        p_temp,
+        p_chuva,
+        v_alerta
+    );
 
     IF v_alerta THEN
-        SELECT COUNT(*) INTO v_existe
+
+        SELECT COUNT(*)
+        INTO v_existe
         FROM alertas
-        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+        WHERE id_estacao = p_id_estacao
+        AND estado = 'ativo';
 
         IF v_existe = 0 THEN
-            INSERT INTO alertas (id_estacao, nivel_critico)
-            VALUES (p_id_estacao, p_nivel);
+
+            INSERT INTO alertas (
+                id_estacao,
+                nivel_critico,
+                tipo
+            )
+            VALUES (
+                p_id_estacao,
+                p_nivel,
+                'critico'
+            );
+
         END IF;
+
     ELSE
+
         UPDATE alertas
-        SET estado = 'resolvido', resolvido_em = NOW()
-        WHERE id_estacao = p_id_estacao AND estado = 'ativo';
+        SET estado = 'resolvido',
+            resolvido_em = NOW()
+        WHERE id_estacao = p_id_estacao
+        AND estado = 'ativo';
+
     END IF;
+
 END$$
 
 DELIMITER ;
-
 -- ============================================================
 -- VIEWS
 -- ============================================================
@@ -167,6 +201,7 @@ SELECT
     l.timestamp,
     l.nivel_agua,
     l.temperatura,
+    l.chuva,
     l.em_alerta
 FROM estacoes e
 JOIN leituras l ON l.id_leitura = (
